@@ -15,3 +15,5 @@ contrib/tls/ca.key
 contrib/tls/ca.txt
 contrib/tls/redis.crt
 contrib/tls/redis.key
+
+.cursor

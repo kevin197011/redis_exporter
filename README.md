@@ -214,7 +214,7 @@ scrape_configs:
 | config-command                      | REDIS_EXPORTER_CONFIG_COMMAND                    | What to use for the CONFIG command, defaults to `CONFIG`, , set to "-" to skip config metrics extraction.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | basic-auth-username                 | REDIS_EXPORTER_BASIC_AUTH_USERNAME               | Username for Basic Authentication with the redis exporter needs to be set together with basic-auth-password to be effective
 | basic-auth-password                 | REDIS_EXPORTER_BASIC_AUTH_PASSWORD               | Password for Basic Authentication with the redis exporter needs to be set together with basic-auth-username to be effective, conflicts with `basic-auth-hash-password`.
-| basic-auth-hash-password            | REDIS_EXPORTER_BASIC_AUTH_HASH_PASSWORD          | Bcrypt-hashed password for Basic Authentication with the redis exporter needs to be set together with basic-auth-username to be effective,  conflicts with `basic-auth-password`. 
+| basic-auth-hash-password            | REDIS_EXPORTER_BASIC_AUTH_HASH_PASSWORD          | Bcrypt-hashed password for Basic Authentication with the redis exporter needs to be set together with basic-auth-username to be effective,  conflicts with `basic-auth-password`.
 | include-metrics-for-empty-databases | REDIS_EXPORTER_INCL_METRICS_FOR_EMPTY_DATABASES  | Whether to emit db metrics (like db_keys) for empty databases
 
 Redis instance addresses can be tcp addresses: `redis://localhost:6379`, `redis.example.com:6379` or e.g. unix sockets: `unix:///tmp/redis.sock`.\
@@ -263,7 +263,7 @@ Docker images are also published to the [Github Container Registry (ghcr.io)](ht
 ```sh
 docker run -d --name redis_exporter -p 9121:9121 quay.io/oliver006/redis_exporter
 
-# or 
+# or
 
 docker run -d --name redis_exporter -p 9121:9121 ghcr.io/oliver006/redis_exporter
 ```
@@ -331,6 +331,51 @@ If running [Redis Sentinel](https://redis.io/topics/sentinel), it may be desirab
 ## Using the mixin
 There is a set of sample rules, alerts and dashboards available in [redis-mixin](contrib/redis-mixin/)
 
+The mixin includes:
+
+### Alerts (26 rules)
+- **Availability**: RedisDown, RedisTooManyConnections, RedisRejectedConnections
+- **Memory**: RedisOutOfMemory, RedisMemoryFragmentationHigh, RedisEvictingKeys
+- **Cluster**: RedisClusterSlotFail, RedisClusterSlotPfail, RedisClusterStateNotOk, RedisClusterSlotsIncomplete, RedisClusterSlotsNotOk, RedisClusterNodeDown, RedisClusterTooFewNodes, RedisClusterSizeChanged, RedisClusterMessageStalled, RedisClusterMessageReceiveStalled
+- **Replication**: RedisReplicationBroken, RedisReplicationLag
+- **Persistence**: RedisRdbLastSaveTooOld, RedisRdbBgsaveFailed, RedisAofRewriteFailed
+- **Queue Monitoring**: RedisQueueBacklog, RedisQueueBacklogCritical, RedisQueueGrowing
+- **Hotkey Monitoring**: RedisHotkeyDetected, RedisLargeKeyDetected
+
+### Recording Rules (14 rules)
+Pre-computed metrics for better query performance:
+- `redis_cluster:slots_health_ratio` - Cluster slots health percentage
+- `redis_cluster:is_healthy` - Overall cluster health (0/1)
+- `redis:memory_used_ratio` - Memory usage percentage
+- `redis:connections_used_ratio` - Connection usage percentage
+- `redis:keyspace_hit_ratio` - Cache hit ratio
+- `redis:commands_per_second` - Command throughput
+- And more...
+
+### Configuration
+All thresholds are configurable in `contrib/redis-mixin/config.libsonnet`:
+
+```jsonnet
+{
+  _config+:: {
+    redisExporterSelector: 'job="redis"',
+    redisConnectionsThreshold: '100',
+    redisClusterMinNodes: '6',
+    redisReplicationLagThreshold: '30',
+    redisQueueBacklogThreshold: '1000',
+    redisHotkeyThreshold: '5',
+    // ... more options
+  },
+}
+```
+
+### Building the mixin
+```bash
+cd contrib/redis-mixin
+make deps   # Install dependencies
+make build  # Generate alerts.yaml, rules.yaml, and dashboards
+```
+
 ## Upgrading from 0.x to 1.x
 
 [PR #256](https://github.com/oliver006/redis_exporter/pull/256) introduced breaking changes which were released as version v1.0.0.
@@ -370,6 +415,73 @@ If using Redis version < 4.0, most of the helpful metrics which we need to gathe
 With the help of LUA scripts, we can gather these metrics.
 One of these scripts [contrib/collect_lists_length_growing.lua](./contrib/collect_lists_length_growing.lua) will help to collect the length of redis lists.
 With this count, we can take following actions such as Create alerts or dashboards in Grafana or any similar tools with these Prometheus metrics.
+
+## Queue Length Monitoring
+
+There are two ways to monitor queue lengths (List, Stream, Sorted Set):
+
+### Method 1: Using built-in flags (recommended for fixed queues)
+
+```bash
+# Monitor specific queues directly (fastest, no SCAN needed)
+./redis_exporter --check-single-keys="db0=queue:orders,db0=queue:emails,db0=celery"
+
+# Monitor queues matching patterns (uses SCAN)
+./redis_exporter --check-keys="db0=queue:*,db0=bull:*"
+```
+
+This will export `redis_key_size{db, key}` metrics with the queue length:
+- For List: uses `LLEN`
+- For Stream: uses `XLEN`
+- For Sorted Set: uses `ZCARD`
+- For Hash: uses `HLEN`
+
+### Method 2: Using Lua script (recommended for dynamic queues)
+
+For scenarios with many dynamic queues, use the provided Lua script:
+
+```bash
+./redis_exporter --script=contrib/collect_queue_length.lua
+```
+
+The script automatically scans for common queue prefixes (`queue:`, `celery:`, `bull:`, `sidekiq:`, `resque:`) and exports metrics via `redis_script_values{key}`.
+
+You can customize the script to add your own queue prefixes or specific queue names.
+
+## Key Hotspot Detection
+
+To detect hot keys (high access frequency) or large keys (high memory usage), use the hotspot detection script:
+
+```bash
+./redis_exporter --script=contrib/collect_key_hotspot.lua
+```
+
+### Exported Metrics
+
+| Metric | Description |
+|--------|-------------|
+| `redis_script_values{key="hotkey_freq_<keyname>"}` | Access frequency of hot key (requires LFU policy) |
+| `redis_script_values{key="hotkey_memory_bytes_<keyname>"}` | Memory usage of hot key |
+| `redis_script_values{key="hotkey_detected_total"}` | Total number of hot keys detected |
+| `redis_script_values{key="large_key_count"}` | Number of keys exceeding memory threshold |
+| `redis_script_values{key="lfu_policy_enabled"}` | Whether LFU policy is enabled (1/0) |
+
+### Enabling LFU for Better Hotspot Detection
+
+For more accurate hotspot detection, enable LFU (Least Frequently Used) eviction policy in Redis:
+
+```bash
+redis-cli CONFIG SET maxmemory-policy allkeys-lfu
+```
+
+When LFU is enabled, the script uses `OBJECT FREQ` to get the actual access frequency of keys. Without LFU, the script falls back to memory-based detection only.
+
+### Configuring the Script
+
+Edit `contrib/collect_key_hotspot.lua` to customize:
+- `key_prefixes`: Key prefixes to scan for hotspots
+- `top_n`: Number of top hot keys to export (default: 10)
+- `memory_threshold`: Memory threshold in bytes for large key detection (default: 1MB)
 
 ## Development
 
