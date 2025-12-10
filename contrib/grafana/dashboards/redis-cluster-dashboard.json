@@ -303,18 +303,30 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [{ "options": { "master": { "color": "blue", "text": "Master" }, "slave": { "color": "green", "text": "Slave" } }, "type": "value" }], "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }, "noValue": "Master" } },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 29 },
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-text" }, "filterable": false, "inspect": false } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "role" }, "properties": [
+            { "id": "mappings", "value": [{ "options": { "master": { "color": "blue", "text": "🔵 Master" }, "slave": { "color": "green", "text": "🟢 Slave" } }, "type": "value" }] },
+            { "id": "custom.width", "value": 100 }
+          ]},
+          { "matcher": { "id": "byName", "options": "instance" }, "properties": [{ "id": "custom.width", "value": 150 }] }
+        ]
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 29 },
       "id": 40,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value" },
-      "targets": [{ "expr": "redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false } },
+      "targets": [{ "expr": "redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "format": "table", "instant": true, "refId": "A" }],
       "title": "节点角色",
-      "type": "stat"
+      "transformations": [
+        { "id": "filterFieldsByName", "options": { "include": { "names": ["instance", "role"] } } }
+      ],
+      "type": "table"
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "0 (单机)" } },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 29 },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 29 },
       "id": 41,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_connected_slaves{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -324,7 +336,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 100 }, { "color": "red", "value": 1000 }] }, "unit": "bytes", "noValue": "无复制" } },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 29 },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 29 },
       "id": 42,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_master_repl_offset{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"} - on(instance) redis_slave_repl_offset{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
