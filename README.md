@@ -232,6 +232,51 @@ ACL SETUSER <<<USERNAME>>> -@all +@connection -command +client -hello +info -aut
 docker run -d --name redis_exporter -p 9121:9121 ghcr.io/kevin197011/redis_exporter:latest
 ```
 
+#### 使用环境变量配置
+
+所有命令行参数都可以通过环境变量配置。如果 Redis 需要认证，可以通过 `REDIS_PASSWORD` 环境变量注入密码：
+
+```sh
+docker run -d --name redis_exporter -p 9121:9121 \
+  -e REDIS_ADDR=redis://redis-server:6379 \
+  -e REDIS_PASSWORD=your_password \
+  ghcr.io/kevin197011/redis_exporter:latest
+```
+
+> **注意**：`REDIS_PASSWORD` 环境变量可选，不设置或为空时默认无密码连接。
+
+#### Docker Compose 示例
+
+```yaml
+version: '3.8'
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD:-}
+    ports:
+      - "6379:6379"
+
+  redis_exporter:
+    image: ghcr.io/kevin197011/redis_exporter:latest
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}  # 可选，不设置则无密码
+    depends_on:
+      - redis
+```
+
+使用方式：
+
+```sh
+# 无密码启动
+docker-compose up -d
+
+# 有密码启动
+REDIS_PASSWORD=mysecretpassword docker-compose up -d
+```
+
 `latest` docker 镜像只包含导出器二进制文件。
 如果出于调试目的，您需要在有 shell 的镜像中运行导出器，可以运行 `alpine` 镜像：
 
