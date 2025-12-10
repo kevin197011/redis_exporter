@@ -307,8 +307,8 @@
         "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-text" }, "filterable": false, "inspect": false } },
         "overrides": [
           { "matcher": { "id": "byName", "options": "role" }, "properties": [
-            { "id": "mappings", "value": [{ "options": { "standalone": { "color": "purple", "text": "🟣 单机" }, "master": { "color": "blue", "text": "🔵 Master" }, "slave": { "color": "green", "text": "🟢 Slave" } }, "type": "value" }] },
-            { "id": "custom.width", "value": 100 }
+            { "id": "mappings", "value": [{ "options": { "cluster_master": { "color": "orange", "text": "🟠 Cluster" }, "cluster_slave": { "color": "yellow", "text": "🟡 Cluster Slave" }, "standalone": { "color": "purple", "text": "🟣 单机" }, "master": { "color": "blue", "text": "🔵 Master" }, "slave": { "color": "green", "text": "🟢 Slave" } }, "type": "value" }] },
+            { "id": "custom.width", "value": 120 }
           ]},
           { "matcher": { "id": "byName", "options": "instance" }, "properties": [{ "id": "custom.width", "value": 150 }] }
         ]
@@ -317,14 +317,17 @@
       "id": 40,
       "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false } },
       "targets": [
-        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", role=\"master\"} and on(instance) (redis_connected_slaves == 0), \"role\", \"standalone\", \"\", \"\")", "format": "table", "instant": true, "refId": "A" },
-        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", role=\"master\"} and on(instance) (redis_connected_slaves > 0), \"role\", \"master\", \"\", \"\")", "format": "table", "instant": true, "refId": "B" },
-        { "expr": "redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", role=\"slave\"}", "format": "table", "instant": true, "refId": "C" }
+        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", redis_mode=\"cluster\", role=\"master\"}, \"display_role\", \"cluster_master\", \"\", \"\")", "format": "table", "instant": true, "refId": "A" },
+        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", redis_mode=\"cluster\", role=\"slave\"}, \"display_role\", \"cluster_slave\", \"\", \"\")", "format": "table", "instant": true, "refId": "B" },
+        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", redis_mode=\"standalone\", role=\"master\"} and on(instance) (redis_connected_slaves == 0), \"display_role\", \"standalone\", \"\", \"\")", "format": "table", "instant": true, "refId": "C" },
+        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", redis_mode=\"standalone\", role=\"master\"} and on(instance) (redis_connected_slaves > 0), \"display_role\", \"master\", \"\", \"\")", "format": "table", "instant": true, "refId": "D" },
+        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", redis_mode=\"standalone\", role=\"slave\"}, \"display_role\", \"slave\", \"\", \"\")", "format": "table", "instant": true, "refId": "E" }
       ],
       "title": "节点角色",
       "transformations": [
         { "id": "merge", "options": {} },
-        { "id": "filterFieldsByName", "options": { "include": { "names": ["instance", "role"] } } }
+        { "id": "filterFieldsByName", "options": { "include": { "names": ["instance", "display_role"] } } },
+        { "id": "organize", "options": { "renameByName": { "display_role": "role" } } }
       ],
       "type": "table"
     },
