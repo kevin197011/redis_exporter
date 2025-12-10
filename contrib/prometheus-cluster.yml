@@ -15,6 +15,8 @@ scrape_configs:
         - '172.30.0.11:7001'
         - '172.30.0.12:7002'
         - '172.30.0.13:7003'
+        labels:
+          project: 'g01'  # 项目标签，用于 Grafana 按项目过滤
     metrics_path: /scrape
     relabel_configs:
       - source_labels: [__address__]
