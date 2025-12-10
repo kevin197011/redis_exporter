@@ -373,7 +373,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 34 },
       "id": 51,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_commands_duration_seconds_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) * 1000000 / rate(redis_commands_processed_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "sum by (instance) (rate(redis_commands_duration_seconds_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])) * 1000000 / sum by (instance) (rate(redis_commands_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "平均命令延迟",
       "type": "stat"
     },
