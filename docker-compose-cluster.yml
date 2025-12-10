@@ -1,0 +1,192 @@
+# Redis Cluster Monitoring (3 Master Nodes)
+# Usage:
+#   docker-compose -f docker-compose-cluster.yml up -d
+#
+# Access:
+#   Grafana:    http://localhost:3000 (admin/admin123)
+#   Prometheus: http://localhost:9090
+#   Exporter:   http://localhost:9121/metrics
+#
+# Redis Cluster Nodes:
+#   redis-1: 7001
+#   redis-2: 7002
+#   redis-3: 7003
+
+services:
+  # Redis Cluster Node 1
+  redis-1:
+    image: redis:7-alpine
+    container_name: redis-1
+    restart: unless-stopped
+    command: >
+      redis-server
+      --port 7001
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-redis123}
+      --masterauth ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "7001:7001"
+      - "17001:17001"
+    volumes:
+      - redis-1-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7001", "-a", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      redis-cluster:
+        ipv4_address: 172.30.0.11
+
+  # Redis Cluster Node 2
+  redis-2:
+    image: redis:7-alpine
+    container_name: redis-2
+    restart: unless-stopped
+    command: >
+      redis-server
+      --port 7002
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-redis123}
+      --masterauth ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "7002:7002"
+      - "17002:17002"
+    volumes:
+      - redis-2-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7002", "-a", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      redis-cluster:
+        ipv4_address: 172.30.0.12
+
+  # Redis Cluster Node 3
+  redis-3:
+    image: redis:7-alpine
+    container_name: redis-3
+    restart: unless-stopped
+    command: >
+      redis-server
+      --port 7003
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-redis123}
+      --masterauth ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "7003:7003"
+      - "17003:17003"
+    volumes:
+      - redis-3-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7003", "-a", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      redis-cluster:
+        ipv4_address: 172.30.0.13
+
+  # Cluster Initializer
+  redis-cluster-init:
+    image: redis:7-alpine
+    container_name: redis-cluster-init
+    depends_on:
+      redis-1:
+        condition: service_healthy
+      redis-2:
+        condition: service_healthy
+      redis-3:
+        condition: service_healthy
+    command: >
+      sh -c "echo 'Waiting for Redis nodes...' && sleep 5 && echo 'Creating Redis Cluster...' && echo yes | redis-cli -a redis123 --cluster create 172.30.0.11:7001 172.30.0.12:7002 172.30.0.13:7003 --cluster-replicas 0 && echo 'Cluster created!' && redis-cli -a redis123 -h 172.30.0.11 -p 7001 cluster info"
+    networks:
+      redis-cluster:
+        ipv4_address: 172.30.0.10
+
+  # Redis Exporter (Cluster Mode)
+  redis_exporter:
+    image: ghcr.io/kevin197011/redis_exporter:latest
+    container_name: redis_exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: redis://172.30.0.11:7001
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      REDIS_EXPORTER_IS_CLUSTER: "true"
+    depends_on:
+      redis-cluster-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9121/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - redis-cluster
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./contrib/prometheus-cluster.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - redis_exporter
+    networks:
+      - redis-cluster
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./contrib/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./contrib/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - redis-cluster
+
+networks:
+  redis-cluster:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  redis-1-data:
+  redis-2-data:
+  redis-3-data:
+  prometheus_data:
+  grafana_data:
+

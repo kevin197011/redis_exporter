@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'redis-cluster'
+    static_configs:
+      - targets: ['redis_exporter:9121']
+    
+  # Scrape each cluster node directly via /scrape endpoint
+  - job_name: 'redis-cluster-nodes'
+    static_configs:
+      - targets:
+        - '172.30.0.11:7001'
+        - '172.30.0.12:7002'
+        - '172.30.0.13:7003'
+    metrics_path: /scrape
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+        replacement: 'redis://${1}'
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: __address__
+        replacement: 'redis_exporter:9121'
+    params:
+      check-keys: [""]
+
