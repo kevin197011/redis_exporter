@@ -307,7 +307,7 @@
         "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-text" }, "filterable": false, "inspect": false } },
         "overrides": [
           { "matcher": { "id": "byName", "options": "role" }, "properties": [
-            { "id": "mappings", "value": [{ "options": { "master": { "color": "blue", "text": "🔵 Master" }, "slave": { "color": "green", "text": "🟢 Slave" } }, "type": "value" }] },
+            { "id": "mappings", "value": [{ "options": { "standalone": { "color": "purple", "text": "🟣 单机" }, "master": { "color": "blue", "text": "🔵 Master" }, "slave": { "color": "green", "text": "🟢 Slave" } }, "type": "value" }] },
             { "id": "custom.width", "value": 100 }
           ]},
           { "matcher": { "id": "byName", "options": "instance" }, "properties": [{ "id": "custom.width", "value": 150 }] }
@@ -316,9 +316,14 @@
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 29 },
       "id": 40,
       "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false } },
-      "targets": [{ "expr": "redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "format": "table", "instant": true, "refId": "A" }],
+      "targets": [
+        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", role=\"master\"} and on(instance) (redis_connected_slaves == 0), \"role\", \"standalone\", \"\", \"\")", "format": "table", "instant": true, "refId": "A" },
+        { "expr": "label_replace(redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", role=\"master\"} and on(instance) (redis_connected_slaves > 0), \"role\", \"master\", \"\", \"\")", "format": "table", "instant": true, "refId": "B" },
+        { "expr": "redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\", role=\"slave\"}", "format": "table", "instant": true, "refId": "C" }
+      ],
       "title": "节点角色",
       "transformations": [
+        { "id": "merge", "options": {} },
         { "id": "filterFieldsByName", "options": { "include": { "names": ["instance", "role"] } } }
       ],
       "type": "table"
