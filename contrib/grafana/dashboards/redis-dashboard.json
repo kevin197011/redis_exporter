@@ -307,7 +307,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 29 },
       "id": 40,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value" },
-      "targets": [{ "expr": "redis_instance_info{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{role}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_instance_info{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "节点角色",
       "type": "stat"
     },
@@ -383,7 +383,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
       "id": 52,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "topk(10, rate(redis_commands_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{cmd}}", "refId": "A" }],
+      "targets": [{ "expr": "topk(10, rate(redis_commands_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}} {{cmd}}", "refId": "A" }],
       "title": "Top 10 命令速率",
       "type": "timeseries"
     },
@@ -548,7 +548,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
       "id": 62,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "redis_key_size{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{db}}:{{key}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_key_size{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} {{db}}:{{key}}", "refId": "A" }],
       "title": "队列长度 (check-keys)",
       "type": "timeseries"
     },
