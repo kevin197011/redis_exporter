@@ -65,8 +65,8 @@
       "id": 5,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "redis_connected_clients{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "连接数", "refId": "A" },
-        { "expr": "redis_blocked_clients{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "阻塞数", "refId": "B" }
+        { "expr": "redis_connected_clients{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} 连接", "refId": "A" },
+        { "expr": "redis_blocked_clients{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} 阻塞", "refId": "B" }
       ],
       "title": "连接数趋势",
       "type": "timeseries"
@@ -77,7 +77,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 5 },
       "id": 6,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_connections_received_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "新连接/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_connections_received_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "新连接速率",
       "type": "timeseries"
     },
@@ -87,7 +87,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 8, "y": 5 },
       "id": 7,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_rejected_connections_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "拒绝连接/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_rejected_connections_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "拒绝连接速率",
       "type": "timeseries"
     },
@@ -144,8 +144,8 @@
       "id": 14,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "redis_memory_used_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "已用内存", "refId": "A" },
-        { "expr": "redis_memory_used_rss_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "RSS内存", "refId": "B" }
+        { "expr": "redis_memory_used_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} 已用", "refId": "A" },
+        { "expr": "redis_memory_used_rss_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} RSS", "refId": "B" }
       ],
       "title": "内存使用趋势",
       "type": "timeseries"
@@ -156,7 +156,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 14 },
       "id": 15,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "redis_mem_fragmentation_ratio{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "碎片率", "refId": "A" }],
+      "targets": [{ "expr": "redis_mem_fragmentation_ratio{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "内存碎片率趋势",
       "type": "timeseries"
     },
@@ -166,7 +166,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 8, "y": 14 },
       "id": 16,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_evicted_keys_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) > 0", "legendFormat": "淘汰key/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_evicted_keys_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) > 0", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "Key 淘汰速率",
       "type": "timeseries"
     },
@@ -223,8 +223,8 @@
       "id": 24,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
       "targets": [
-        { "expr": "redis_aof_current_size_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "AOF当前大小", "refId": "A" },
-        { "expr": "redis_aof_base_size_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "AOF基础大小", "refId": "B" }
+        { "expr": "redis_aof_current_size_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} 当前", "refId": "A" },
+        { "expr": "redis_aof_base_size_bytes{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} 基础", "refId": "B" }
       ],
       "title": "AOF 文件大小",
       "type": "timeseries"
@@ -347,7 +347,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 16, "y": 29 },
       "id": 44,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "redis_master_repl_offset{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "Master Offset", "refId": "A" }],
+      "targets": [{ "expr": "redis_master_repl_offset{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "复制偏移量",
       "type": "timeseries"
     },
@@ -393,7 +393,7 @@
       "gridPos": { "h": 4, "w": 12, "x": 0, "y": 38 },
       "id": 53,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_commands_processed_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "命令/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_commands_processed_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "命令处理趋势",
       "type": "timeseries"
     },
@@ -450,8 +450,8 @@
       "id": 84,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "rate(redis_net_input_bytes_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "入流量", "refId": "A" },
-        { "expr": "rate(redis_net_output_bytes_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "出流量", "refId": "B" }
+        { "expr": "rate(redis_net_input_bytes_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}} 入", "refId": "A" },
+        { "expr": "rate(redis_net_output_bytes_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}} 出", "refId": "B" }
       ],
       "title": "网络流量趋势",
       "type": "timeseries"
@@ -509,8 +509,8 @@
       "id": 89,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "rate(redis_expired_keys_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "过期/秒", "refId": "A" },
-        { "expr": "rate(redis_evicted_keys_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "淘汰/秒", "refId": "B" }
+        { "expr": "rate(redis_expired_keys_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}} 过期", "refId": "A" },
+        { "expr": "rate(redis_evicted_keys_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}} 淘汰", "refId": "B" }
       ],
       "title": "Key 过期/淘汰趋势",
       "type": "timeseries"
@@ -558,7 +558,7 @@
       "gridPos": { "h": 4, "w": 12, "x": 0, "y": 57 },
       "id": 63,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "redis_db_keys{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{db}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_db_keys{instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} {{db}}", "refId": "A" }],
       "title": "各 DB Key 数量",
       "type": "timeseries"
     },
@@ -604,7 +604,7 @@
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 62 },
       "id": 73,
       "options": { "legend": { "calcs": ["mean", "min"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) / (rate(redis_keyspace_hits_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) + rate(redis_keyspace_misses_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "命中率", "refId": "A" }],
+      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) / (rate(redis_keyspace_hits_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) + rate(redis_keyspace_misses_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "缓存命中率趋势",
       "type": "timeseries"
     },
@@ -615,8 +615,8 @@
       "id": 74,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "none" } },
       "targets": [
-        { "expr": "rate(redis_keyspace_hits_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "命中/秒", "refId": "A" },
-        { "expr": "rate(redis_keyspace_misses_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "未命中/秒", "refId": "B" }
+        { "expr": "rate(redis_keyspace_hits_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}} 命中", "refId": "A" },
+        { "expr": "rate(redis_keyspace_misses_total{instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}} 未命中", "refId": "B" }
       ],
       "title": "命中/未命中速率",
       "type": "timeseries"
