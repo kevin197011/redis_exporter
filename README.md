@@ -1,7 +1,7 @@
 # Prometheus Valkey & Redis 指标导出器
 
-[![Tests](https://github.com/oliver006/redis_exporter/actions/workflows/tests.yml/badge.svg)](https://github.com/oliver006/redis_exporter/actions/workflows/tests.yml)
-[![Coverage Status](https://coveralls.io/repos/github/oliver006/redis_exporter/badge.svg?branch=master)](https://coveralls.io/github/oliver006/redis_exporter?branch=master) [![codecov](https://codecov.io/gh/oliver006/redis_exporter/branch/master/graph/badge.svg)](https://codecov.io/gh/oliver006/redis_exporter) [![docker_pulls](https://img.shields.io/docker/pulls/oliver006/redis_exporter.svg)](https://img.shields.io/docker/pulls/oliver006/redis_exporter.svg)
+[![Tests](https://github.com/kevin197011/redis_exporter/actions/workflows/tests.yml/badge.svg)](https://github.com/kevin197011/redis_exporter/actions/workflows/tests.yml)
+[![Docker Build](https://github.com/kevin197011/redis_exporter/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/kevin197011/redis_exporter/actions/workflows/docker-publish.yml)
 
 用于 Valkey 指标的 Prometheus 导出器（Redis 兼容）。\
 支持 Valkey 和 Redis 2.x、3.x、4.x、5.x、6.x 和 7.x
@@ -13,7 +13,7 @@
 ### 本地构建和运行
 
 ```sh
-git clone https://github.com/oliver006/redis_exporter.git
+git clone https://github.com/kevin197011/redis_exporter.git
 cd redis_exporter
 go build .
 ./redis_exporter --version
@@ -21,7 +21,7 @@ go build .
 
 ### 预编译二进制文件
 
-预编译的二进制文件请查看 [发布页面](https://github.com/oliver006/redis_exporter/releases)。
+预编译的二进制文件请查看 [发布页面](https://github.com/kevin197011/redis_exporter/releases)。
 
 ### 基础 Prometheus 配置
 
@@ -224,35 +224,25 @@ ACL SETUSER <<<USERNAME>>> -@all +@connection -command +client -hello +info -aut
 
 ### 通过 Docker 运行
 
-最新版本自动发布到 [Docker Hub 仓库](https://hub.docker.com/r/oliver006/redis_exporter/)
+最新版本自动发布到 [GitHub Container Registry (ghcr.io)](https://github.com/kevin197011/redis_exporter/pkgs/container/redis_exporter)
 
 您可以这样运行：
 
 ```sh
-docker run -d --name redis_exporter -p 9121:9121 oliver006/redis_exporter
-```
-
-Docker 镜像也发布到 [Github Container Registry (ghcr.io)](https://github.com/oliver006/redis_exporter/pkgs/container/redis_exporter) 和 [quay.io](https://quay.io/oliver006/redis_exporter)，如果您遇到 Docker hub 的速率限制问题，可以从那里拉取。
-
-```sh
-docker run -d --name redis_exporter -p 9121:9121 quay.io/oliver006/redis_exporter
-
-# 或者
-
-docker run -d --name redis_exporter -p 9121:9121 ghcr.io/oliver006/redis_exporter
+docker run -d --name redis_exporter -p 9121:9121 ghcr.io/kevin197011/redis_exporter:latest
 ```
 
 `latest` docker 镜像只包含导出器二进制文件。
 如果出于调试目的，您需要在有 shell 的镜像中运行导出器，可以运行 `alpine` 镜像：
 
 ```sh
-docker run -d --name redis_exporter -p 9121:9121 oliver006/redis_exporter:alpine
+docker run -d --name redis_exporter -p 9121:9121 ghcr.io/kevin197011/redis_exporter:latest-alpine
 ```
 
 如果您尝试访问在主机节点上运行的 Redis 实例，需要添加 `--network host` 以便 redis_exporter 容器可以访问它：
 
 ```sh
-docker run -d --name redis_exporter --network host oliver006/redis_exporter
+docker run -d --name redis_exporter --network host ghcr.io/kevin197011/redis_exporter:latest
 ```
 
 ### 在 Kubernetes 上运行
