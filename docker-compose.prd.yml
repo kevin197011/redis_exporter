@@ -1,0 +1,43 @@
+# Redis Exporter Production Deployment
+# Usage:
+#   docker-compose -f docker-compose.prd.yml up -d
+#
+# With password:
+#   REDIS_PASSWORD=your_password docker-compose -f docker-compose.prd.yml up -d
+#
+# Environment variables:
+#   REDIS_ADDR     - Redis address (default: redis://localhost:6379)
+#   REDIS_PASSWORD - Redis password (optional, default: empty)
+#   REDIS_USER     - Redis username for ACL (optional)
+
+services:
+  redis_exporter:
+    image: ghcr.io/kevin197011/redis_exporter:latest
+    container_name: redis_exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: ${REDIS_ADDR:-redis://localhost:6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_USER: ${REDIS_USER:-}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9121/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 32M
+
