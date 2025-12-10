@@ -27,5 +27,17 @@ scrape_configs:
       - target_label: __address__
         replacement: 'redis_exporter:9121'
     params:
+      # 队列监控配置 (check-keys 参数)
+      # 空字符串表示不监控: check-keys: [""]
+      #
+      # 示例1: 监控指定队列 (推荐，性能好)
+      # check-single-keys: ["db0=queue:orders,db0=queue:emails,db0=celery"]
+      #
+      # 示例2: 模式匹配监控所有队列 (大库慎用，会 SCAN 整个库)
+      # check-keys: ["db0=queue:*"]
+      #
+      # 示例3: 监控所有 list 类型的 key (非常耗性能，仅测试用)
+      # check-keys: ["db0=*"]
+      #
       check-keys: [""]
 
