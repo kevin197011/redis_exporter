@@ -122,18 +122,17 @@ services:
     ports:
       - "9121:9121"
     environment:
-      REDIS_ADDR: redis://172.30.0.11:7001
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      REDIS_EXPORTER_IS_CLUSTER: "true"
-      # 项目标签配置说明:
-      # project 标签通过 Prometheus relabel 配置，见 contrib/prometheus-cluster.yml
-      # 在 static_configs.labels 中设置: project: 'g01'
-      # 这样所有指标都会带上 project="g01" 标签，方便 Grafana 按项目过滤
+      # ===== 集群模式配置 =====
+      # 不需要配置 REDIS_ADDR，由 Prometheus 通过 /scrape 端点按需采集各节点
+      # Redis 节点地址统一在 contrib/prometheus-cluster.yml 中配置:
+      #   static_configs:
+      #     - targets: ['172.30.0.11:7001', '172.30.0.12:7002', '172.30.0.13:7003']
+      #       labels:
+      #         project: 'g01'
       #
-      # 队列监控配置（按需启用，取消注释即可）
-      # 方式1: 监控指定队列（推荐，性能好）
-      # REDIS_EXPORTER_CHECK_SINGLE_KEYS: "db0=queue:orders,db0=queue:emails,db0=celery"
-      # 方式2: 模式匹配（大库慎用）
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      # 队列监控配置（按需启用）
+      # REDIS_EXPORTER_CHECK_SINGLE_KEYS: "db0=queue:orders,db0=queue:emails"
       # REDIS_EXPORTER_CHECK_KEYS: "db0=queue:*"
     depends_on:
       redis-cluster-init:
