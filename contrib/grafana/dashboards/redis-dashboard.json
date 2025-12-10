@@ -24,7 +24,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
       "id": 1,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "expr": "redis_up{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_up{instance=~\"$instance\"}", "refId": "A" }],
       "title": "实例状态",
       "type": "stat"
     },
@@ -34,7 +34,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
       "id": 2,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_uptime_in_seconds{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_uptime_in_seconds{instance=~\"$instance\"}", "refId": "A" }],
       "title": "运行时间",
       "type": "stat"
     },
@@ -44,7 +44,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
       "id": 3,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_connected_clients{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_connected_clients{instance=~\"$instance\"}", "refId": "A" }],
       "title": "当前连接数",
       "type": "stat"
     },
@@ -54,7 +54,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
       "id": 4,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_blocked_clients{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_blocked_clients{instance=~\"$instance\"}", "refId": "A" }],
       "title": "阻塞客户端",
       "type": "stat"
     },
@@ -65,8 +65,8 @@
       "id": 5,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "redis_connected_clients{addr=~\"$addr\"}", "legendFormat": "连接数", "refId": "A" },
-        { "expr": "redis_blocked_clients{addr=~\"$addr\"}", "legendFormat": "阻塞数", "refId": "B" }
+        { "expr": "redis_connected_clients{instance=~\"$instance\"}", "legendFormat": "连接数", "refId": "A" },
+        { "expr": "redis_blocked_clients{instance=~\"$instance\"}", "legendFormat": "阻塞数", "refId": "B" }
       ],
       "title": "连接数趋势",
       "type": "timeseries"
@@ -77,7 +77,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 5 },
       "id": 6,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_connections_received_total{addr=~\"$addr\"}[5m])", "legendFormat": "新连接/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_connections_received_total{instance=~\"$instance\"}[5m])", "legendFormat": "新连接/秒", "refId": "A" }],
       "title": "新连接速率",
       "type": "timeseries"
     },
@@ -87,7 +87,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 8, "y": 5 },
       "id": 7,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_rejected_connections_total{addr=~\"$addr\"}[5m])", "legendFormat": "拒绝连接/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_rejected_connections_total{instance=~\"$instance\"}[5m])", "legendFormat": "拒绝连接/秒", "refId": "A" }],
       "title": "拒绝连接速率",
       "type": "timeseries"
     },
@@ -103,7 +103,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 10 },
       "id": 10,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_memory_used_bytes{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_memory_used_bytes{instance=~\"$instance\"}", "refId": "A" }],
       "title": "已用内存",
       "type": "stat"
     },
@@ -113,7 +113,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 10 },
       "id": 11,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_memory_max_bytes{addr=~\"$addr\"} > 0 or vector(0)", "refId": "A" }],
+      "targets": [{ "expr": "redis_memory_max_bytes{instance=~\"$instance\"} > 0 or vector(0)", "refId": "A" }],
       "title": "最大内存",
       "type": "stat"
     },
@@ -123,7 +123,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 10 },
       "id": 12,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_mem_fragmentation_ratio{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_mem_fragmentation_ratio{instance=~\"$instance\"}", "refId": "A" }],
       "title": "内存碎片率",
       "type": "stat"
     },
@@ -133,7 +133,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 10 },
       "id": 13,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "100 * redis_memory_used_bytes{addr=~\"$addr\"} / (redis_memory_max_bytes{addr=~\"$addr\"} > 0)", "refId": "A" }],
+      "targets": [{ "expr": "100 * redis_memory_used_bytes{instance=~\"$instance\"} / (redis_memory_max_bytes{instance=~\"$instance\"} > 0)", "refId": "A" }],
       "title": "内存使用率",
       "type": "stat"
     },
@@ -144,8 +144,8 @@
       "id": 14,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "redis_memory_used_bytes{addr=~\"$addr\"}", "legendFormat": "已用内存", "refId": "A" },
-        { "expr": "redis_memory_used_rss_bytes{addr=~\"$addr\"}", "legendFormat": "RSS内存", "refId": "B" }
+        { "expr": "redis_memory_used_bytes{instance=~\"$instance\"}", "legendFormat": "已用内存", "refId": "A" },
+        { "expr": "redis_memory_used_rss_bytes{instance=~\"$instance\"}", "legendFormat": "RSS内存", "refId": "B" }
       ],
       "title": "内存使用趋势",
       "type": "timeseries"
@@ -156,7 +156,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 14 },
       "id": 15,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "redis_mem_fragmentation_ratio{addr=~\"$addr\"}", "legendFormat": "碎片率", "refId": "A" }],
+      "targets": [{ "expr": "redis_mem_fragmentation_ratio{instance=~\"$instance\"}", "legendFormat": "碎片率", "refId": "A" }],
       "title": "内存碎片率趋势",
       "type": "timeseries"
     },
@@ -166,7 +166,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 8, "y": 14 },
       "id": 16,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_evicted_keys_total{addr=~\"$addr\"}[5m]) > 0", "legendFormat": "淘汰key/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_evicted_keys_total{instance=~\"$instance\"}[5m]) > 0", "legendFormat": "淘汰key/秒", "refId": "A" }],
       "title": "Key 淘汰速率",
       "type": "timeseries"
     },
@@ -182,7 +182,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 19 },
       "id": 20,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_rdb_last_bgsave_status{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_rdb_last_bgsave_status{instance=~\"$instance\"}", "refId": "A" }],
       "title": "RDB 状态",
       "type": "stat"
     },
@@ -192,7 +192,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 19 },
       "id": 21,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "time() - redis_rdb_last_save_timestamp_seconds{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "time() - redis_rdb_last_save_timestamp_seconds{instance=~\"$instance\"}", "refId": "A" }],
       "title": "距上次RDB保存",
       "type": "stat"
     },
@@ -202,7 +202,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 19 },
       "id": 22,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_aof_last_rewrite_status{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_aof_last_rewrite_status{instance=~\"$instance\"}", "refId": "A" }],
       "title": "AOF Rewrite 状态",
       "type": "stat"
     },
@@ -212,7 +212,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 19 },
       "id": 23,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_aof_enabled{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_aof_enabled{instance=~\"$instance\"}", "refId": "A" }],
       "title": "AOF 状态",
       "type": "stat"
     },
@@ -223,8 +223,8 @@
       "id": 24,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
       "targets": [
-        { "expr": "redis_aof_current_size_bytes{addr=~\"$addr\"}", "legendFormat": "AOF当前大小", "refId": "A" },
-        { "expr": "redis_aof_base_size_bytes{addr=~\"$addr\"}", "legendFormat": "AOF基础大小", "refId": "B" }
+        { "expr": "redis_aof_current_size_bytes{instance=~\"$instance\"}", "legendFormat": "AOF当前大小", "refId": "A" },
+        { "expr": "redis_aof_base_size_bytes{instance=~\"$instance\"}", "legendFormat": "AOF基础大小", "refId": "B" }
       ],
       "title": "AOF 文件大小",
       "type": "timeseries"
@@ -241,7 +241,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 24 },
       "id": 30,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_state{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_cluster_state{instance=~\"$instance\"}", "refId": "A" }],
       "title": "集群状态",
       "type": "stat"
     },
@@ -251,7 +251,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 24 },
       "id": 31,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_slots_assigned{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_cluster_slots_assigned{instance=~\"$instance\"}", "refId": "A" }],
       "title": "已分配 Slots",
       "type": "stat"
     },
@@ -261,7 +261,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 24 },
       "id": 32,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_slots_fail{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_cluster_slots_fail{instance=~\"$instance\"}", "refId": "A" }],
       "title": "失败 Slots",
       "type": "stat"
     },
@@ -271,7 +271,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 24 },
       "id": 33,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_slots_pfail{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_cluster_slots_pfail{instance=~\"$instance\"}", "refId": "A" }],
       "title": "PFail Slots",
       "type": "stat"
     },
@@ -281,7 +281,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 16, "y": 24 },
       "id": 34,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_known_nodes{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_cluster_known_nodes{instance=~\"$instance\"}", "refId": "A" }],
       "title": "集群节点数",
       "type": "stat"
     },
@@ -291,7 +291,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 20, "y": 24 },
       "id": 35,
       "options": { "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true },
-      "targets": [{ "expr": "100 * redis_cluster_slots_ok{addr=~\"$addr\"} / 16384", "refId": "A" }],
+      "targets": [{ "expr": "100 * redis_cluster_slots_ok{instance=~\"$instance\"} / 16384", "refId": "A" }],
       "title": "Slots 健康度",
       "type": "gauge"
     },
@@ -307,7 +307,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 29 },
       "id": 40,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value" },
-      "targets": [{ "expr": "redis_instance_info{addr=~\"$addr\"}", "legendFormat": "{{role}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_instance_info{instance=~\"$instance\"}", "legendFormat": "{{role}}", "refId": "A" }],
       "title": "节点角色",
       "type": "stat"
     },
@@ -317,7 +317,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 29 },
       "id": 41,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_connected_slaves{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_connected_slaves{instance=~\"$instance\"}", "refId": "A" }],
       "title": "连接的从节点",
       "type": "stat"
     },
@@ -327,7 +327,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 29 },
       "id": 42,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_master_repl_offset{addr=~\"$addr\"} - on(instance) redis_slave_repl_offset{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_master_repl_offset{instance=~\"$instance\"} - on(instance) redis_slave_repl_offset{instance=~\"$instance\"}", "refId": "A" }],
       "title": "复制延迟 (bytes)",
       "type": "stat"
     },
@@ -337,7 +337,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 29 },
       "id": 43,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_master_link_up{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_master_link_up{instance=~\"$instance\"}", "refId": "A" }],
       "title": "主节点连接",
       "type": "stat"
     },
@@ -347,7 +347,7 @@
       "gridPos": { "h": 4, "w": 8, "x": 16, "y": 29 },
       "id": 44,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "redis_master_repl_offset{addr=~\"$addr\"}", "legendFormat": "Master Offset", "refId": "A" }],
+      "targets": [{ "expr": "redis_master_repl_offset{instance=~\"$instance\"}", "legendFormat": "Master Offset", "refId": "A" }],
       "title": "复制偏移量",
       "type": "timeseries"
     },
@@ -363,7 +363,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 34 },
       "id": 50,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_commands_processed_total{addr=~\"$addr\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_commands_processed_total{instance=~\"$instance\"}[5m])", "refId": "A" }],
       "title": "命令处理速率",
       "type": "stat"
     },
@@ -373,7 +373,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 34 },
       "id": 51,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_commands_duration_seconds_total{addr=~\"$addr\"}[5m]) * 1000000 / rate(redis_commands_processed_total{addr=~\"$addr\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_commands_duration_seconds_total{instance=~\"$instance\"}[5m]) * 1000000 / rate(redis_commands_processed_total{instance=~\"$instance\"}[5m])", "refId": "A" }],
       "title": "平均命令延迟",
       "type": "stat"
     },
@@ -383,7 +383,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
       "id": 52,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "topk(10, rate(redis_commands_total{addr=~\"$addr\"}[5m]))", "legendFormat": "{{cmd}}", "refId": "A" }],
+      "targets": [{ "expr": "topk(10, rate(redis_commands_total{instance=~\"$instance\"}[5m]))", "legendFormat": "{{cmd}}", "refId": "A" }],
       "title": "Top 10 命令速率",
       "type": "timeseries"
     },
@@ -393,7 +393,7 @@
       "gridPos": { "h": 4, "w": 12, "x": 0, "y": 38 },
       "id": 53,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "rate(redis_commands_processed_total{addr=~\"$addr\"}[5m])", "legendFormat": "命令/秒", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_commands_processed_total{instance=~\"$instance\"}[5m])", "legendFormat": "命令/秒", "refId": "A" }],
       "title": "命令处理趋势",
       "type": "timeseries"
     },
@@ -409,7 +409,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 43 },
       "id": 80,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_net_input_bytes_total{addr=~\"$addr\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_net_input_bytes_total{instance=~\"$instance\"}[5m])", "refId": "A" }],
       "title": "网络入流量",
       "type": "stat"
     },
@@ -419,7 +419,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 43 },
       "id": 81,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_net_output_bytes_total{addr=~\"$addr\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_net_output_bytes_total{instance=~\"$instance\"}[5m])", "refId": "A" }],
       "title": "网络出流量",
       "type": "stat"
     },
@@ -429,7 +429,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 43 },
       "id": 82,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_cluster_messages_sent_total{addr=~\"$addr\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_cluster_messages_sent_total{instance=~\"$instance\"}[5m])", "refId": "A" }],
       "title": "集群消息发送/秒",
       "type": "stat"
     },
@@ -439,7 +439,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 43 },
       "id": 83,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_cluster_messages_received_total{addr=~\"$addr\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_cluster_messages_received_total{instance=~\"$instance\"}[5m])", "refId": "A" }],
       "title": "集群消息接收/秒",
       "type": "stat"
     },
@@ -450,8 +450,8 @@
       "id": 84,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "rate(redis_net_input_bytes_total{addr=~\"$addr\"}[5m])", "legendFormat": "入流量", "refId": "A" },
-        { "expr": "rate(redis_net_output_bytes_total{addr=~\"$addr\"}[5m])", "legendFormat": "出流量", "refId": "B" }
+        { "expr": "rate(redis_net_input_bytes_total{instance=~\"$instance\"}[5m])", "legendFormat": "入流量", "refId": "A" },
+        { "expr": "rate(redis_net_output_bytes_total{instance=~\"$instance\"}[5m])", "legendFormat": "出流量", "refId": "B" }
       ],
       "title": "网络流量趋势",
       "type": "timeseries"
@@ -468,7 +468,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 48 },
       "id": 85,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_slowlog_length{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_slowlog_length{instance=~\"$instance\"}", "refId": "A" }],
       "title": "慢查询数量",
       "type": "stat"
     },
@@ -478,7 +478,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 48 },
       "id": 86,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_expired_keys_total{addr=~\"$addr\"}[5m])", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_expired_keys_total{instance=~\"$instance\"}[5m])", "refId": "A" }],
       "title": "Key 过期速率",
       "type": "stat"
     },
@@ -488,7 +488,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 48 },
       "id": 87,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_slowlog_last_id{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_slowlog_last_id{instance=~\"$instance\"}", "refId": "A" }],
       "title": "最后慢查询ID",
       "type": "stat"
     },
@@ -498,7 +498,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 48 },
       "id": 88,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_cpu_user_seconds_total{addr=~\"$addr\"}[5m]) * 100", "refId": "A" }],
+      "targets": [{ "expr": "rate(redis_cpu_user_seconds_total{instance=~\"$instance\"}[5m]) * 100", "refId": "A" }],
       "title": "CPU 使用率 (User)",
       "type": "stat"
     },
@@ -509,8 +509,8 @@
       "id": 89,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "rate(redis_expired_keys_total{addr=~\"$addr\"}[5m])", "legendFormat": "过期/秒", "refId": "A" },
-        { "expr": "rate(redis_evicted_keys_total{addr=~\"$addr\"}[5m])", "legendFormat": "淘汰/秒", "refId": "B" }
+        { "expr": "rate(redis_expired_keys_total{instance=~\"$instance\"}[5m])", "legendFormat": "过期/秒", "refId": "A" },
+        { "expr": "rate(redis_evicted_keys_total{instance=~\"$instance\"}[5m])", "legendFormat": "淘汰/秒", "refId": "B" }
       ],
       "title": "Key 过期/淘汰趋势",
       "type": "timeseries"
@@ -527,7 +527,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 53 },
       "id": 60,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "sum(redis_db_keys{addr=~\"$addr\"}) or vector(0)", "refId": "A" }],
+      "targets": [{ "expr": "sum(redis_db_keys{instance=~\"$instance\"}) or vector(0)", "refId": "A" }],
       "title": "总 Key 数量",
       "type": "stat"
     },
@@ -537,7 +537,7 @@
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 53 },
       "id": 61,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "sum(redis_db_keys_expiring{addr=~\"$addr\"}) or vector(0)", "refId": "A" }],
+      "targets": [{ "expr": "sum(redis_db_keys_expiring{instance=~\"$instance\"}) or vector(0)", "refId": "A" }],
       "title": "过期 Key 数量",
       "type": "stat"
     },
@@ -548,7 +548,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
       "id": 62,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "redis_key_size{addr=~\"$addr\"}", "legendFormat": "{{db}}:{{key}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_key_size{instance=~\"$instance\"}", "legendFormat": "{{db}}:{{key}}", "refId": "A" }],
       "title": "队列长度 (check-keys)",
       "type": "timeseries"
     },
@@ -558,7 +558,7 @@
       "gridPos": { "h": 4, "w": 12, "x": 0, "y": 57 },
       "id": 63,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "redis_db_keys{addr=~\"$addr\"}", "legendFormat": "{{db}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_db_keys{instance=~\"$instance\"}", "legendFormat": "{{db}}", "refId": "A" }],
       "title": "各 DB Key 数量",
       "type": "timeseries"
     },
@@ -574,7 +574,7 @@
       "gridPos": { "h": 6, "w": 6, "x": 0, "y": 62 },
       "id": 70,
       "options": { "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true },
-      "targets": [{ "expr": "100 * redis_keyspace_hits_total{addr=~\"$addr\"} / (redis_keyspace_hits_total{addr=~\"$addr\"} + redis_keyspace_misses_total{addr=~\"$addr\"})", "refId": "A" }],
+      "targets": [{ "expr": "100 * redis_keyspace_hits_total{instance=~\"$instance\"} / (redis_keyspace_hits_total{instance=~\"$instance\"} + redis_keyspace_misses_total{instance=~\"$instance\"})", "refId": "A" }],
       "title": "缓存命中率",
       "type": "gauge"
     },
@@ -584,7 +584,7 @@
       "gridPos": { "h": 3, "w": 3, "x": 6, "y": 62 },
       "id": 71,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_keyspace_hits_total{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_keyspace_hits_total{instance=~\"$instance\"}", "refId": "A" }],
       "title": "总命中数",
       "type": "stat"
     },
@@ -594,7 +594,7 @@
       "gridPos": { "h": 3, "w": 3, "x": 9, "y": 62 },
       "id": 72,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_keyspace_misses_total{addr=~\"$addr\"}", "refId": "A" }],
+      "targets": [{ "expr": "redis_keyspace_misses_total{instance=~\"$instance\"}", "refId": "A" }],
       "title": "总未命中数",
       "type": "stat"
     },
@@ -604,7 +604,7 @@
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 62 },
       "id": 73,
       "options": { "legend": { "calcs": ["mean", "min"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{addr=~\"$addr\"}[5m]) / (rate(redis_keyspace_hits_total{addr=~\"$addr\"}[5m]) + rate(redis_keyspace_misses_total{addr=~\"$addr\"}[5m]))", "legendFormat": "命中率", "refId": "A" }],
+      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{instance=~\"$instance\"}[5m]) / (rate(redis_keyspace_hits_total{instance=~\"$instance\"}[5m]) + rate(redis_keyspace_misses_total{instance=~\"$instance\"}[5m]))", "legendFormat": "命中率", "refId": "A" }],
       "title": "缓存命中率趋势",
       "type": "timeseries"
     },
@@ -615,8 +615,8 @@
       "id": 74,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "none" } },
       "targets": [
-        { "expr": "rate(redis_keyspace_hits_total{addr=~\"$addr\"}[5m])", "legendFormat": "命中/秒", "refId": "A" },
-        { "expr": "rate(redis_keyspace_misses_total{addr=~\"$addr\"}[5m])", "legendFormat": "未命中/秒", "refId": "B" }
+        { "expr": "rate(redis_keyspace_hits_total{instance=~\"$instance\"}[5m])", "legendFormat": "命中/秒", "refId": "A" },
+        { "expr": "rate(redis_keyspace_misses_total{instance=~\"$instance\"}[5m])", "legendFormat": "未命中/秒", "refId": "B" }
       ],
       "title": "命中/未命中速率",
       "type": "timeseries"
@@ -646,16 +646,16 @@
         "allValue": ".*",
         "current": { "selected": true, "text": "All", "value": "$__all" },
         "datasource": { "type": "prometheus", "uid": "prometheus" },
-        "definition": "label_values(redis_up, addr)",
+        "definition": "label_values(redis_up, instance)",
         "hide": 0,
         "includeAll": true,
-        "label": "Redis 地址",
+        "label": "Redis 节点",
         "multi": true,
-        "name": "addr",
+        "name": "instance",
         "options": [],
-        "query": { "query": "label_values(redis_up, addr)", "refId": "StandardVariableQuery" },
+        "query": { "query": "label_values(redis_up, instance)", "refId": "StandardVariableQuery" },
         "refresh": 2,
-        "regex": "",
+        "regex": "/^(?!.*exporter).*/",
         "skipUrlSync": false,
         "sort": 1,
         "type": "query"
