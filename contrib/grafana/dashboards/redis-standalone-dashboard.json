@@ -518,7 +518,7 @@
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 57 },
       "id": 73,
       "options": { "legend": { "calcs": ["mean", "min"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) / (rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) + rate(redis_keyspace_misses_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])) or vector(0)", "legendFormat": "{{instance}}", "refId": "A" }],
+      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) / (rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) + rate(redis_keyspace_misses_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "缓存命中率趋势",
       "type": "timeseries"
     },
