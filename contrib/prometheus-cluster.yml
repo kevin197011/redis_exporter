@@ -7,11 +7,8 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'redis-cluster'
-    static_configs:
-      - targets: ['redis_exporter:9121']
-
-  # Scrape each cluster node directly via /scrape endpoint
+  # Scrape each cluster node via /scrape endpoint
+  # Note: 'redis-cluster' job removed - it was redundant and caused duplicate metrics
   - job_name: 'redis-cluster-nodes'
     static_configs:
       - targets:
