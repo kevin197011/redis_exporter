@@ -113,7 +113,7 @@
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 10 },
       "id": 11,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_memory_max_bytes{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_memory_max_bytes{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"} > 0 or vector(0)", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "最大内存",
       "type": "stat"
     },
@@ -231,72 +231,6 @@
     },
     {
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
-      "id": 103,
-      "title": "🔗 集群 Slots 健康度",
-      "type": "row"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [{ "options": { "0": { "color": "red", "text": "异常" }, "1": { "color": "green", "text": "正常" } }, "type": "value" }], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }, "noValue": "单机模式" } },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 24 },
-      "id": 30,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_state{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "集群状态",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "单机模式" } },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 24 },
-      "id": 31,
-      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_slots_assigned{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "已分配 Slots",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }, "noValue": "0 ✓" } },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 24 },
-      "id": 32,
-      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_slots_fail{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "失败 Slots",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }] }, "noValue": "0 ✓" } },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 24 },
-      "id": 33,
-      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_slots_pfail{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "PFail Slots",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "单机模式" } },
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 24 },
-      "id": 34,
-      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "redis_cluster_known_nodes{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "集群节点数",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "max": 100, "min": 0, "thresholds": { "mode": "percentage", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 90 }, { "color": "green", "value": 100 }] }, "unit": "percent", "noValue": "单机模式" } },
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 24 },
-      "id": 35,
-      "options": { "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true },
-      "targets": [{ "expr": "100 * redis_cluster_slots_ok{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"} / 16384", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "Slots 健康度",
-      "type": "gauge"
-    },
-    {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 28 },
       "id": 104,
       "title": "🔄 主从复制状态",
       "type": "row"
@@ -304,17 +238,17 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [{ "options": { "master": { "color": "blue", "text": "Master" }, "slave": { "color": "green", "text": "Slave" } }, "type": "value" }], "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }, "noValue": "Master" } },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 29 },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 24 },
       "id": 40,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "value" },
-      "targets": [{ "expr": "redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
+      "targets": [{ "expr": "redis_instance_info{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} {{role}}", "refId": "A" }],
       "title": "节点角色",
       "type": "stat"
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "0 (单机)" } },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 29 },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 24 },
       "id": 41,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_connected_slaves{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -324,7 +258,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 100 }, { "color": "red", "value": 1000 }] }, "unit": "bytes", "noValue": "无复制" } },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 29 },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 24 },
       "id": 42,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_master_repl_offset{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"} - on(instance) redis_slave_repl_offset{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -334,7 +268,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [{ "options": { "0": { "color": "red", "text": "断开" }, "1": { "color": "green", "text": "连接" } }, "type": "value" }], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }, "noValue": "Master节点" } },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 29 },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 24 },
       "id": 43,
       "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_master_link_up{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -344,7 +278,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "bytes", "noValue": "无复制数据" } },
-      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 29 },
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 24 },
       "id": 44,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
       "targets": [{ "expr": "redis_master_repl_offset{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -352,7 +286,7 @@
       "type": "timeseries"
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 33 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 28 },
       "id": 105,
       "title": "⚡ 命令执行次数/时长",
       "type": "row"
@@ -360,7 +294,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "noValue": "0" } },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 34 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 29 },
       "id": 50,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "rate(redis_commands_processed_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -370,7 +304,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "µs", "noValue": "-" } },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 34 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 29 },
       "id": 51,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "sum by (instance) (rate(redis_commands_duration_seconds_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])) * 1000000 / sum by (instance) (rate(redis_commands_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -380,7 +314,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "ops", "noValue": "等待数据..." } },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 29 },
       "id": 52,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [{ "expr": "topk(10, rate(redis_commands_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}} {{cmd}}", "refId": "A" }],
@@ -390,7 +324,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "ops", "noValue": "等待数据..." } },
-      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 38 },
+      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 33 },
       "id": 53,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
       "targets": [{ "expr": "rate(redis_commands_processed_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -398,15 +332,15 @@
       "type": "timeseries"
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 },
       "id": 108,
-      "title": "🌐 网络 / 集群通信",
+      "title": "🌐 网络流量",
       "type": "row"
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "Bps", "noValue": "0" } },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 43 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 38 },
       "id": 80,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "rate(redis_net_input_bytes_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -416,7 +350,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "Bps", "noValue": "0" } },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 43 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 38 },
       "id": 81,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "rate(redis_net_output_bytes_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -425,28 +359,8 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "noValue": "单机模式" } },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 43 },
-      "id": 82,
-      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_cluster_messages_sent_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "集群消息发送/秒",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "noValue": "单机模式" } },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 43 },
-      "id": 83,
-      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
-      "targets": [{ "expr": "rate(redis_cluster_messages_received_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
-      "title": "集群消息接收/秒",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "Bps", "noValue": "等待数据..." } },
-      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 43 },
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 38 },
       "id": 84,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
@@ -457,7 +371,7 @@
       "type": "timeseries"
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 47 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 },
       "id": 109,
       "title": "🐢 慢查询 / 过期处理",
       "type": "row"
@@ -465,7 +379,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 10 }, { "color": "red", "value": 50 }] }, "noValue": "0" } },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 48 },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 43 },
       "id": 85,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_slowlog_length{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -475,7 +389,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "ops", "noValue": "0" } },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 48 },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 43 },
       "id": 86,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "rate(redis_expired_keys_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -485,7 +399,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "s", "noValue": "-" } },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 48 },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 43 },
       "id": 87,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_slowlog_last_id{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -495,7 +409,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "percent", "noValue": "-" } },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 48 },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 43 },
       "id": 88,
       "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "rate(redis_cpu_user_seconds_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) * 100", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -505,7 +419,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "ops", "noValue": "等待数据..." } },
-      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 48 },
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 43 },
       "id": 89,
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
@@ -516,7 +430,7 @@
       "type": "timeseries"
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 52 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 47 },
       "id": 106,
       "title": "🔥 Key 热点 / 队列长度",
       "type": "row"
@@ -524,7 +438,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "0" } },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 53 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 48 },
       "id": 60,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "sum(redis_db_keys{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}) or vector(0)", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -534,7 +448,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "0" } },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 53 },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 48 },
       "id": 61,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "sum(redis_db_keys_expiring{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}) or vector(0)", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -545,7 +459,7 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "description": "使用 --check-keys 或 --check-single-keys 参数监控队列",
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 100, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "short", "noValue": "未配置队列监控\n使用 --check-keys 参数" } },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 },
       "id": 62,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [{ "expr": "redis_key_size{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} {{db}}:{{key}}", "refId": "A" }],
@@ -555,7 +469,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "short", "noValue": "无 Key" } },
-      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 57 },
+      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 52 },
       "id": 63,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [{ "expr": "redis_db_keys{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}} {{db}}", "refId": "A" }],
@@ -563,7 +477,7 @@
       "type": "timeseries"
     },
     {
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 61 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 56 },
       "id": 107,
       "title": "🎯 缓存命中率",
       "type": "row"
@@ -571,7 +485,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "max": 100, "min": 0, "thresholds": { "mode": "percentage", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 80 }, { "color": "green", "value": 95 }] }, "unit": "percent", "noValue": "无访问" } },
-      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 62 },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 57 },
       "id": 70,
       "options": { "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true },
       "targets": [{ "expr": "100 * redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"} / (redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"} + redis_keyspace_misses_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"})", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -581,7 +495,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "0" } },
-      "gridPos": { "h": 3, "w": 3, "x": 6, "y": 62 },
+      "gridPos": { "h": 3, "w": 3, "x": 6, "y": 57 },
       "id": 71,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -591,7 +505,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "noValue": "0" } },
-      "gridPos": { "h": 3, "w": 3, "x": 9, "y": 62 },
+      "gridPos": { "h": 3, "w": 3, "x": 9, "y": 57 },
       "id": 72,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } },
       "targets": [{ "expr": "redis_keyspace_misses_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -601,7 +515,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "percent", "noValue": "等待数据..." } },
-      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 62 },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 57 },
       "id": 73,
       "options": { "legend": { "calcs": ["mean", "min"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
       "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) / (rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) + rate(redis_keyspace_misses_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}}", "refId": "A" }],
@@ -611,7 +525,7 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "ops", "noValue": "无访问" } },
-      "gridPos": { "h": 3, "w": 6, "x": 6, "y": 65 },
+      "gridPos": { "h": 3, "w": 6, "x": 6, "y": 60 },
       "id": 74,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "none" } },
       "targets": [
@@ -624,7 +538,7 @@
   ],
   "refresh": "30s",
   "schemaVersion": 38,
-  "tags": ["redis", "prometheus"],
+  "tags": ["redis", "prometheus", "standalone"],
   "templating": {
     "list": [
       {
@@ -683,7 +597,8 @@
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "",
-  "title": "Redis Cluster 监控面板",
-  "uid": "redis-cluster-monitoring",
+  "title": "Redis 单实例/主从 监控面板",
+  "uid": "redis-standalone-monitoring",
   "version": 1
 }
+
