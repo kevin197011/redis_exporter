@@ -514,11 +514,11 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "percent", "noValue": "等待数据..." } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "percent", "noValue": "0" } },
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 57 },
       "id": 73,
       "options": { "legend": { "calcs": ["mean", "min"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
-      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) / (rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) + rate(redis_keyspace_misses_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]))", "legendFormat": "{{instance}}", "refId": "A" }],
+      "targets": [{ "expr": "100 * rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) / (rate(redis_keyspace_hits_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m]) + rate(redis_keyspace_misses_total{project=~\"$project\", instance=~\"$instance\", instance!~\".*exporter.*\"}[5m])) or vector(0)", "legendFormat": "{{instance}}", "refId": "A" }],
       "title": "缓存命中率趋势",
       "type": "timeseries"
     },
