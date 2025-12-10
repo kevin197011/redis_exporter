@@ -1,19 +1,16 @@
-# Prometheus Valkey & Redis Metrics Exporter
+# Prometheus Valkey & Redis 指标导出器
 
 [![Tests](https://github.com/oliver006/redis_exporter/actions/workflows/tests.yml/badge.svg)](https://github.com/oliver006/redis_exporter/actions/workflows/tests.yml)
- [![Coverage Status](https://coveralls.io/repos/github/oliver006/redis_exporter/badge.svg?branch=master)](https://coveralls.io/github/oliver006/redis_exporter?branch=master) [![codecov](https://codecov.io/gh/oliver006/redis_exporter/branch/master/graph/badge.svg)](https://codecov.io/gh/oliver006/redis_exporter) [![docker_pulls](https://img.shields.io/docker/pulls/oliver006/redis_exporter.svg)](https://img.shields.io/docker/pulls/oliver006/redis_exporter.svg) [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+[![Coverage Status](https://coveralls.io/repos/github/oliver006/redis_exporter/badge.svg?branch=master)](https://coveralls.io/github/oliver006/redis_exporter?branch=master) [![codecov](https://codecov.io/gh/oliver006/redis_exporter/branch/master/graph/badge.svg)](https://codecov.io/gh/oliver006/redis_exporter) [![docker_pulls](https://img.shields.io/docker/pulls/oliver006/redis_exporter.svg)](https://img.shields.io/docker/pulls/oliver006/redis_exporter.svg)
 
-Prometheus exporter for Valkey metrics (Redis-compatible).\
-Supports Valkey and Redis 2.x, 3.x, 4.x, 5.x, 6.x, and 7.x
+用于 Valkey 指标的 Prometheus 导出器（Redis 兼容）。\
+支持 Valkey 和 Redis 2.x、3.x、4.x、5.x、6.x 和 7.x
 
-#### Ukraine is still suffering from Russian aggression, [please consider supporting Red Cross Ukraine with a donation](https://redcross.org.ua/en/).
+[English Documentation](README-en.md)
 
-[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://stand-with-ukraine.pp.ua)
+## 构建和运行导出器
 
-
-## Building and running the exporter
-
-### Build and run locally
+### 本地构建和运行
 
 ```sh
 git clone https://github.com/oliver006/redis_exporter.git
@@ -22,15 +19,13 @@ go build .
 ./redis_exporter --version
 ```
 
+### 预编译二进制文件
 
-### Pre-build binaries
+预编译的二进制文件请查看 [发布页面](https://github.com/oliver006/redis_exporter/releases)。
 
-For pre-built binaries please take a look at [the releases](https://github.com/oliver006/redis_exporter/releases).
+### 基础 Prometheus 配置
 
-
-### Basic Prometheus Configuration
-
-Add a block to the `scrape_configs` of your prometheus.yml config file:
+在 prometheus.yml 配置文件的 `scrape_configs` 中添加以下配置块：
 
 ```yaml
 scrape_configs:
@@ -39,14 +34,13 @@ scrape_configs:
     - targets: ['<<REDIS-EXPORTER-HOSTNAME>>:9121']
 ```
 
-and adjust the host name accordingly.
+并相应调整主机名。
 
+### Kubernetes SD 配置
 
-### Kubernetes SD configurations
+为了在下拉菜单中显示可读的实例名称而不是 IP，建议使用 [实例重标签](https://www.robustperception.io/controlling-the-instance-label)。
 
-To have instances in the drop-down as human readable names rather than IPs, it is suggested to use [instance relabelling](https://www.robustperception.io/controlling-the-instance-label).
-
-For example, if the metrics are being scraped via the pod role, one could add:
+例如，如果通过 pod 角色抓取指标，可以添加：
 
 ```yaml
           - source_labels: [__meta_kubernetes_pod_name]
@@ -55,21 +49,20 @@ For example, if the metrics are being scraped via the pod role, one could add:
             regex: (.*redis.*)
 ```
 
-as a relabel config to the corresponding scrape config. As per the regex value, only pods with "redis" in their name will be relabelled as such.
+作为相应抓取配置的重标签配置。根据正则表达式值，只有名称中包含 "redis" 的 pod 才会被这样重标签。
 
-Similar approaches can be taken with [other role types](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config) depending on how scrape targets are retrieved.
+根据如何检索抓取目标，可以对 [其他角色类型](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config) 采用类似的方法。
 
+### 抓取多个 Redis 主机的 Prometheus 配置
 
-### Prometheus Configuration to Scrape Multiple Redis Hosts
+Prometheus 文档有一篇 [非常有价值的文章](https://prometheus.io/docs/guides/multi-target-exporter/) 介绍多目标导出器的工作原理。
 
-The Prometheus docs have a [very informative article](https://prometheus.io/docs/guides/multi-target-exporter/) on how multi-target exporters are intended to work.
-
-Run the exporter with the command line flag `--redis.addr=` so it won't try to access the local instance every time the `/metrics` endpoint is scraped. Using below config instead of the /metric endpoint the /scrape endpoint will be used by prometheus. As an example the first target will be queried with this web request:
+使用命令行参数 `--redis.addr=` 运行导出器，这样每次抓取 `/metrics` 端点时就不会尝试访问本地实例。使用以下配置时，prometheus 将使用 /scrape 端点而不是 /metric 端点。例如，第一个目标将通过以下 web 请求查询：
 http://exporterhost:9121/scrape?target=first-redis-host:6379
 
 ```yaml
 scrape_configs:
-  ## config for the multiple Redis targets that the exporter will scrape
+  ## 导出器将抓取的多个 Redis 目标的配置
   - job_name: 'redis_exporter_targets'
     static_configs:
       - targets:
@@ -86,21 +79,18 @@ scrape_configs:
       - target_label: __address__
         replacement: <<REDIS-EXPORTER-HOSTNAME>>:9121
 
-  ## config for scraping the exporter itself
+  ## 抓取导出器本身的配置
   - job_name: 'redis_exporter'
     static_configs:
       - targets:
         - <<REDIS-EXPORTER-HOSTNAME>>:9121
 ```
 
-The Redis instances are listed under `targets`, the Redis exporter hostname is configured via the last relabel_config rule.\
-If authentication is needed for the Redis instances then you can set the password via the `--redis.password` command line option of
-the exporter (this means you can currently only use one password across the instances you try to scrape this way. Use several
-exporters if this is a problem). \
-You can also use a json file to supply multiple targets by using `file_sd_configs` like so:
+Redis 实例在 `targets` 下列出，Redis 导出器主机名通过最后一个 relabel_config 规则配置。\
+如果 Redis 实例需要认证，可以通过导出器的 `--redis.password` 命令行选项设置密码（这意味着目前只能在此方式抓取的所有实例中使用一个密码。如果这是个问题，请使用多个导出器）。\
+您也可以使用 json 文件通过 `file_sd_configs` 提供多个目标，如下所示：
 
 ```yaml
-
 scrape_configs:
   - job_name: 'redis_exporter_targets'
     file_sd_configs:
@@ -115,14 +105,14 @@ scrape_configs:
       - target_label: __address__
         replacement: <<REDIS-EXPORTER-HOSTNAME>>:9121
 
-  ## config for scraping the exporter itself
+  ## 抓取导出器本身的配置
   - job_name: 'redis_exporter'
     static_configs:
       - targets:
         - <<REDIS-EXPORTER-HOSTNAME>>:9121
 ```
 
-The `targets-redis-instances.json` should look something like this:
+`targets-redis-instances.json` 文件应该类似这样：
 
 ```json
 [
@@ -133,13 +123,13 @@ The `targets-redis-instances.json` should look something like this:
 ]
 ```
 
-Prometheus uses file watches and all changes to the json file are applied immediately.
+Prometheus 使用文件监视，对 json 文件的所有更改会立即生效。
 
-### Prometheus Configuration to Scrape All Nodes in a Redis Cluster
+### 抓取 Redis 集群所有节点的 Prometheus 配置
 
-When using a Redis Cluster, the exporter provides a discovery endpoint that can be used to discover all nodes in the cluster.
-To use this feature, the exporter must be started with the `--is-cluster` flag.\
-The discovery endpoint is available at `/discover-cluster-nodes` and can be used in the Prometheus configuration like this:
+使用 Redis 集群时，导出器提供了一个发现端点，可用于发现集群中的所有节点。
+要使用此功能，必须使用 `--is-cluster` 参数启动导出器。\
+发现端点位于 `/discover-cluster-nodes`，可以在 Prometheus 配置中这样使用：
 
 ```yaml
 scrape_configs:
@@ -156,204 +146,181 @@ scrape_configs:
       - target_label: __address__
         replacement: <<REDIS-EXPORTER-HOSTNAME>>:9121
 
-  ## config for scraping the exporter itself
+  ## 抓取导出器本身的配置
   - job_name: 'redis_exporter'
     static_configs:
       - targets:
         - <<REDIS-EXPORTER-HOSTNAME>>:9121
 ```
 
-### Command line flags
+### 命令行参数
 
-| Name                                | Environment Variable Name                        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-|-------------------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| redis.addr                          | REDIS_ADDR                                       | Address of the Redis instance, defaults to `redis://localhost:6379`. If TLS is enabled, the address must be like the following `rediss://localhost:6379`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| redis.user                          | REDIS_USER                                       | User name to use for authentication (Redis ACL for Redis 6.0 and newer).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| redis.password                      | REDIS_PASSWORD                                   | Password of the Redis instance, defaults to `""` (no password).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| redis.password-file                 | REDIS_PASSWORD_FILE                              | Password file of the Redis instance to scrape, defaults to `""` (no password file).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| check-keys                          | REDIS_EXPORTER_CHECK_KEYS                        | Comma separated list of key patterns to export value and length/size, eg: `db3=user_count` will export key `user_count` from db `3`. db defaults to `0` if omitted. The key patterns specified with this flag will be found using [SCAN](https://valkey.io/commands/scan).  Use this option if you need glob pattern matching; `check-single-keys` is faster for non-pattern keys. Warning: using `--check-keys` to match a very large number of keys can slow down the exporter to the point where it doesn't finish scraping the redis instance. --check-keys doesn't work in cluster mode as "SCAN" does not work across multiple instances. |
-| check-single-keys                   | REDIS_EXPORTER_CHECK_SINGLE_KEYS                 | Comma separated list of keys to export value and length/size, eg: `db3=user_count` will export key `user_count` from db `3`. db defaults to `0` if omitted.  The keys specified with this flag will be looked up directly without any glob pattern matching.  Use this option if you don't need glob pattern matching;  it is faster than `check-keys`.                                                                                                                                                                                                                                                                                         |
-| check-streams                       | REDIS_EXPORTER_CHECK_STREAMS                     | Comma separated list of stream-patterns to export info about streams, groups and consumers. Syntax is the same as `check-keys`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| check-single-streams                | REDIS_EXPORTER_CHECK_SINGLE_STREAMS              | Comma separated list of streams to export info about streams, groups and consumers. The streams specified with this flag will be looked up directly without any glob pattern matching.  Use this option if you don't need glob pattern matching;  it is faster than `check-streams`.                                                                                                                                                                                                                                                                                                                                                            |
-| streams-exclude-consumer-metrics    | REDIS_EXPORTER_STREAMS_EXCLUDE_CONSUMER_METRICS  | Don't collect per consumer metrics for streams (decreases amount of metrics and cardinality).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| check-keys-batch-size               | REDIS_EXPORTER_CHECK_KEYS_BATCH_SIZE             | Approximate number of keys to process in each execution. This is basically the COUNT option that will be passed into the SCAN command as part of the execution of the key or key group metrics, see [COUNT option](https://valkey.io/commands/scan#the-count-option). Larger value speeds up scanning. Still Redis is a single-threaded app, huge `COUNT` can affect production environment.                                                                                                                                                                                                                                                    |
-| count-keys                          | REDIS_EXPORTER_COUNT_KEYS                        | Comma separated list of patterns to count, eg: `db3=sessions:*` will count all keys with prefix `sessions:` from db `3`. db defaults to `0` if omitted. Warning: The exporter runs SCAN to count the keys. This might not perform well on large databases.                                                                                                                                                                                                                                                                                                                                                                                      |
-| script                              | REDIS_EXPORTER_SCRIPT                            | Comma separated list of path(s) to Redis Lua script(s) for gathering extra metrics.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| debug                               | REDIS_EXPORTER_DEBUG                             | Verbose debug output                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| log-level                           | REDIS_EXPORTER_LOG_LEVEL                         | Set log level                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| log-format                          | REDIS_EXPORTER_LOG_FORMAT                        | Log format, valid options are `txt` (default) and `json`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| namespace                           | REDIS_EXPORTER_NAMESPACE                         | Namespace for the metrics, defaults to `redis`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| connection-timeout                  | REDIS_EXPORTER_CONNECTION_TIMEOUT                | Timeout for connection to Redis instance, defaults to "15s" (in Golang duration format)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| web.listen-address                  | REDIS_EXPORTER_WEB_LISTEN_ADDRESS                | Address to listen on for web interface and telemetry, defaults to `0.0.0.0:9121`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| web.telemetry-path                  | REDIS_EXPORTER_WEB_TELEMETRY_PATH                | Path under which to expose metrics, defaults to `/metrics`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| redis-only-metrics                  | REDIS_EXPORTER_REDIS_ONLY_METRICS                | Whether to export only Redis metrics (omit Go process+runtime metrics), defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| include-go-runtime-metrics          | REDIS_EXPORTER_INCLUDE_GO_RUNTIME_METRICS        | Whether to include Go runtime metrics, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| include-config-metrics              | REDIS_EXPORTER_INCL_CONFIG_METRICS               | Whether to include all config settings as metrics, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| include-system-metrics              | REDIS_EXPORTER_INCL_SYSTEM_METRICS               | Whether to include system metrics like `total_system_memory_bytes`, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| include-modules-metrics             | REDIS_EXPORTER_INCL_MODULES_METRICS              | Whether to collect Redis Modules metrics, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| include-search-indexes-metrics      | REDIS_EXPORTER_INCL_SEARCH_INDEXES_METRICS       | Whether to collect Redis Search indexes metrics, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| check-search-indexes                | REDIS_EXPORTER_CHECK_SEARCH_INDEXES              | Regex pattern for Redis Search indexes to export metrics from FT.INFO command, defaults to ".*".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| exclude-latency-histogram-metrics   | REDIS_EXPORTER_EXCLUDE_LATENCY_HISTOGRAM_METRICS | Do not try to collect latency histogram metrics (to avoid `WARNING, LOGGED ONCE ONLY: cmd LATENCY HISTOGRAM` error on Redis < v7).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| redact-config-metrics               | REDIS_EXPORTER_REDACT_CONFIG_METRICS             | Whether to redact config settings that include potentially sensitive information like passwords.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ping-on-connect                     | REDIS_EXPORTER_PING_ON_CONNECT                   | Whether to ping the redis instance after connecting and record the duration as a metric, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| is-tile38                           | REDIS_EXPORTER_IS_TILE38                         | Whether to scrape Tile38 specific metrics, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| is-cluster                          | REDIS_EXPORTER_IS_CLUSTER                        | Whether this is a redis cluster (Enable this if you need to fetch key level data on a Redis Cluster).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| export-client-list                  | REDIS_EXPORTER_EXPORT_CLIENT_LIST                | Whether to scrape Client List specific metrics, defaults to false.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| export-client-port                  | REDIS_EXPORTER_EXPORT_CLIENT_PORT                | Whether to include the client's port when exporting the client list. Warning: including the port increases the number of metrics generated and will make your Prometheus server take up more memory                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| skip-tls-verification               | REDIS_EXPORTER_SKIP_TLS_VERIFICATION             | Whether to skip TLS verification when the exporter connects to a Redis instance                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| tls-client-key-file                 | REDIS_EXPORTER_TLS_CLIENT_KEY_FILE               | Name of the client key file (including full path) if the server requires TLS client authentication                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| tls-client-cert-file                | REDIS_EXPORTER_TLS_CLIENT_CERT_FILE              | Name the client cert file (including full path) if the server requires TLS client authentication                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| tls-server-key-file                 | REDIS_EXPORTER_TLS_SERVER_KEY_FILE               | Name of the server key file (including full path) if the web interface and telemetry should use TLS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| tls-server-cert-file                | REDIS_EXPORTER_TLS_SERVER_CERT_FILE              | Name of the server certificate file (including full path) if the web interface and telemetry should use TLS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| tls-server-ca-cert-file             | REDIS_EXPORTER_TLS_SERVER_CA_CERT_FILE           | Name of the CA certificate file (including full path) if the web interface and telemetry should use TLS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| tls-server-min-version              | REDIS_EXPORTER_TLS_SERVER_MIN_VERSION            | Minimum TLS version that is acceptable by the web interface and telemetry when using TLS, defaults to `TLS1.2` (supports `TLS1.0`,`TLS1.1`,`TLS1.2`,`TLS1.3`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| tls-ca-cert-file                    | REDIS_EXPORTER_TLS_CA_CERT_FILE                  | Name of the CA certificate file (including full path) if the server requires TLS client authentication                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| set-client-name                     | REDIS_EXPORTER_SET_CLIENT_NAME                   | Whether to set client name to redis_exporter, defaults to true.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| check-key-groups                    | REDIS_EXPORTER_CHECK_KEY_GROUPS                  | Comma separated list of [LUA regexes](https://www.lua.org/pil/20.1.html) for classifying keys into groups. The regexes are applied in specified order to individual keys, and the group name is generated by concatenating all capture groups of the first regex that matches a key. A key will be tracked under the `unclassified` group if none of the specified regexes matches it.                                                                                                                                                                                                                                                          |
-| max-distinct-key-groups             | REDIS_EXPORTER_MAX_DISTINCT_KEY_GROUPS           | Maximum number of distinct key groups that can be tracked independently *per Redis database*. If exceeded, only key groups with the highest memory consumption within the limit will be tracked separately, all remaining key groups will be tracked under a single `overflow` key group.                                                                                                                                                                                                                                                                                                                                                       |
-| config-command                      | REDIS_EXPORTER_CONFIG_COMMAND                    | What to use for the CONFIG command, defaults to `CONFIG`, , set to "-" to skip config metrics extraction.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| basic-auth-username                 | REDIS_EXPORTER_BASIC_AUTH_USERNAME               | Username for Basic Authentication with the redis exporter needs to be set together with basic-auth-password to be effective
-| basic-auth-password                 | REDIS_EXPORTER_BASIC_AUTH_PASSWORD               | Password for Basic Authentication with the redis exporter needs to be set together with basic-auth-username to be effective, conflicts with `basic-auth-hash-password`.
-| basic-auth-hash-password            | REDIS_EXPORTER_BASIC_AUTH_HASH_PASSWORD          | Bcrypt-hashed password for Basic Authentication with the redis exporter needs to be set together with basic-auth-username to be effective,  conflicts with `basic-auth-password`.
-| include-metrics-for-empty-databases | REDIS_EXPORTER_INCL_METRICS_FOR_EMPTY_DATABASES  | Whether to emit db metrics (like db_keys) for empty databases
+| 名称 | 环境变量名 | 描述 |
+|------|-----------|------|
+| redis.addr | REDIS_ADDR | Redis 实例地址，默认为 `redis://localhost:6379`。如果启用 TLS，地址必须像这样 `rediss://localhost:6379` |
+| redis.user | REDIS_USER | 用于认证的用户名（Redis 6.0 及更新版本的 Redis ACL）|
+| redis.password | REDIS_PASSWORD | Redis 实例密码，默认为 `""`（无密码）|
+| redis.password-file | REDIS_PASSWORD_FILE | 要抓取的 Redis 实例的密码文件，默认为 `""`（无密码文件）|
+| check-keys | REDIS_EXPORTER_CHECK_KEYS | 要导出值和长度/大小的键模式的逗号分隔列表，例如：`db3=user_count` 将从 db `3` 导出键 `user_count`。如果省略 db，默认为 `0`。使用 [SCAN](https://valkey.io/commands/scan) 查找。如果需要 glob 模式匹配请使用此选项；对于非模式键，`check-single-keys` 更快。警告：使用 `--check-keys` 匹配大量键可能会使导出器变慢甚至无法完成抓取。在集群模式下不工作，因为 "SCAN" 不能跨多个实例工作。|
+| check-single-keys | REDIS_EXPORTER_CHECK_SINGLE_KEYS | 要导出值和长度/大小的键的逗号分隔列表，例如：`db3=user_count` 将从 db `3` 导出键 `user_count`。如果省略 db，默认为 `0`。此参数指定的键将直接查找，不使用任何 glob 模式匹配。如果不需要 glob 模式匹配，使用此选项；它比 `check-keys` 更快。|
+| check-streams | REDIS_EXPORTER_CHECK_STREAMS | 要导出 streams、groups 和 consumers 信息的 stream 模式的逗号分隔列表。语法与 `check-keys` 相同。|
+| check-single-streams | REDIS_EXPORTER_CHECK_SINGLE_STREAMS | 要导出 streams、groups 和 consumers 信息的 streams 的逗号分隔列表。直接查找，不使用任何 glob 模式匹配。如果不需要 glob 模式匹配请使用此选项；它比 `check-streams` 更快。|
+| streams-exclude-consumer-metrics | REDIS_EXPORTER_STREAMS_EXCLUDE_CONSUMER_METRICS | 不收集 streams 的每个消费者指标（减少指标数量和基数）|
+| check-keys-batch-size | REDIS_EXPORTER_CHECK_KEYS_BATCH_SIZE | 每次执行中要处理的大致键数量。这基本上是 SCAN 命令中的 COUNT 选项，参见 [COUNT 选项](https://valkey.io/commands/scan#the-count-option)。较大的值加速扫描。但 Redis 是单线程应用，巨大的 `COUNT` 可能影响生产环境。|
+| count-keys | REDIS_EXPORTER_COUNT_KEYS | 要计数的模式的逗号分隔列表，例如：`db3=sessions:*` 将计数 db `3` 中所有前缀为 `sessions:` 的键。如果省略 db，默认为 `0`。警告：导出器运行 SCAN 来计数键，在大型数据库上可能性能不佳。|
+| script | REDIS_EXPORTER_SCRIPT | 用于收集额外指标的 Redis Lua 脚本路径的逗号分隔列表。|
+| debug | REDIS_EXPORTER_DEBUG | 详细调试输出 |
+| log-level | REDIS_EXPORTER_LOG_LEVEL | 设置日志级别 |
+| log-format | REDIS_EXPORTER_LOG_FORMAT | 日志格式，有效选项为 `txt`（默认）和 `json`。|
+| namespace | REDIS_EXPORTER_NAMESPACE | 指标的命名空间，默认为 `redis`。|
+| connection-timeout | REDIS_EXPORTER_CONNECTION_TIMEOUT | 连接 Redis 实例的超时时间，默认为 "15s"（Go 持续时间格式）|
+| web.listen-address | REDIS_EXPORTER_WEB_LISTEN_ADDRESS | Web 界面和遥测的监听地址，默认为 `0.0.0.0:9121`。|
+| web.telemetry-path | REDIS_EXPORTER_WEB_TELEMETRY_PATH | 暴露指标的路径，默认为 `/metrics`。|
+| redis-only-metrics | REDIS_EXPORTER_REDIS_ONLY_METRICS | 是否只导出 Redis 指标（省略 Go 进程+运行时指标），默认为 false。|
+| include-config-metrics | REDIS_EXPORTER_INCL_CONFIG_METRICS | 是否将所有配置设置作为指标包含，默认为 false。|
+| include-system-metrics | REDIS_EXPORTER_INCL_SYSTEM_METRICS | 是否包含系统指标如 `total_system_memory_bytes`，默认为 false。|
+| is-tile38 | REDIS_EXPORTER_IS_TILE38 | 是否抓取 Tile38 特定指标，默认为 false。|
+| is-cluster | REDIS_EXPORTER_IS_CLUSTER | 是否为 Redis 集群（如果需要在 Redis 集群上获取键级别数据，请启用此选项）。|
+| export-client-list | REDIS_EXPORTER_EXPORT_CLIENT_LIST | 是否抓取客户端列表特定指标，默认为 false。|
+| skip-tls-verification | REDIS_EXPORTER_SKIP_TLS_VERIFICATION | 导出器连接 Redis 实例时是否跳过 TLS 验证 |
+| tls-client-key-file | REDIS_EXPORTER_TLS_CLIENT_KEY_FILE | 如果服务器需要 TLS 客户端认证，客户端密钥文件名（包括完整路径）|
+| tls-client-cert-file | REDIS_EXPORTER_TLS_CLIENT_CERT_FILE | 如果服务器需要 TLS 客户端认证，客户端证书文件名（包括完整路径）|
+| tls-ca-cert-file | REDIS_EXPORTER_TLS_CA_CERT_FILE | 如果服务器需要 TLS 客户端认证，CA 证书文件名（包括完整路径）|
+| set-client-name | REDIS_EXPORTER_SET_CLIENT_NAME | 是否将客户端名称设置为 redis_exporter，默认为 true。|
+| check-key-groups | REDIS_EXPORTER_CHECK_KEY_GROUPS | 用于将键分类到组的 [LUA 正则表达式](https://www.lua.org/pil/20.1.html) 的逗号分隔列表。正则表达式按指定顺序应用于各个键，组名由第一个匹配键的正则表达式的所有捕获组连接生成。如果没有指定的正则表达式匹配键，该键将在 `unclassified` 组下跟踪。|
+| max-distinct-key-groups | REDIS_EXPORTER_MAX_DISTINCT_KEY_GROUPS | 每个 Redis 数据库可以独立跟踪的不同键组的最大数量。如果超过，只有在限制内内存消耗最高的键组将被单独跟踪，所有剩余的键组将在单个 `overflow` 键组下报告。|
+| basic-auth-username | REDIS_EXPORTER_BASIC_AUTH_USERNAME | redis exporter 的 Basic 认证用户名，需要与 basic-auth-password 一起设置才能生效 |
+| basic-auth-password | REDIS_EXPORTER_BASIC_AUTH_PASSWORD | redis exporter 的 Basic 认证密码，需要与 basic-auth-username 一起设置才能生效，与 `basic-auth-hash-password` 冲突。|
 
-Redis instance addresses can be tcp addresses: `redis://localhost:6379`, `redis.example.com:6379` or e.g. unix sockets: `unix:///tmp/redis.sock`.\
-SSL is supported by using the `rediss://` schema, for example: `rediss://azure-ssl-enabled-host.redis.cache.windows.net:6380` (note that the port is required when connecting to a non-standard 6379 port, e.g. with Azure Redis instances).\
+Redis 实例地址可以是 tcp 地址：`redis://localhost:6379`、`redis.example.com:6379` 或例如 unix 套接字：`unix:///tmp/redis.sock`。\
+通过使用 `rediss://` 模式支持 SSL，例如：`rediss://azure-ssl-enabled-host.redis.cache.windows.net:6380`（注意，当连接到非标准 6379 端口时需要指定端口，例如 Azure Redis 实例）。
 
-Command line settings take precedence over any configurations provided by the environment variables.
+命令行设置优先于环境变量提供的任何配置。
 
+### Redis 认证
 
-### Authenticating with Redis
+如果您的 Redis 实例需要认证，有几种方法可以提供用户名（Redis 6.x 的 ACL 中新增）和密码。
 
-If your Redis instance requires authentication then there are several ways how you can supply
-a username (new in Redis 6.x with ACLs) and a password.
+您可以在地址中提供用户名和密码，请参阅 `redis://` 模式的 [官方文档](https://www.iana.org/assignments/uri-schemes/prov/redis)。
+您可以设置 `-redis.password-file=sample-pwd-file.json` 来指定密码文件，无论您使用 `/scrape` 端点抓取多个实例还是使用正常的 `/metrics` 端点抓取单个实例，它都会在导出器连接 Redis 实例时使用。
+它仅在 `redis.password == ""` 时生效。请参阅 [contrib/sample-pwd-file.json](contrib/sample-pwd-file.json) 获取工作示例，并确保始终在密码文件条目中包含 `redis://`。
 
-You can provide the username and password as part of the address, see [here](https://www.iana.org/assignments/uri-schemes/prov/redis) for the official documentation of the `redis://` scheme.
-You can set `-redis.password-file=sample-pwd-file.json` to specify a password file, it's used whenever the exporter connects to a Redis instance,
-no matter if you're using the `/scrape` endpoint for multiple instances or the normal `/metrics` endpoint when scraping just one instance.
-It only takes effect when `redis.password == ""`.  See the [contrib/sample-pwd-file.json](contrib/sample-pwd-file.json) for a working example, and make sure to always include the `redis://` in your password file entries.
+包含密码的 URI 示例：`redis://<<username (可选)>>:<<PASSWORD>>@<<HOSTNAME>>:<<PORT>>`
 
-An example for a URI including a password is: `redis://<<username (optional)>>:<<PASSWORD>>@<<HOSTNAME>>:<<PORT>>`
+或者，您可以使用 `--redis.user` 和 `--redis.password` 直接向 redis_exporter 提供用户名和/或密码。
 
-Alternatively, you can provide the username and/or password using the `--redis.user` and `--redis.password` directly to the redis_exporter.
+如果您想为 redis_exporter 使用专用的 Redis 用户（而不是默认用户），则需要为该用户启用一系列命令。
+您可以使用以下 Redis 命令设置用户，只需将 `<<<USERNAME>>>` 和 `<<<PASSWORD>>>` 替换为您想要的值。
 
-If you want to use a dedicated Redis user for the redis_exporter (instead of the default user) then you need enable a list of commands for that user.
-You can use the following Redis command to set up the user, just replace `<<<USERNAME>>>` and `<<<PASSWORD>>>` with your desired values.
 ```
 ACL SETUSER <<<USERNAME>>> -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount -quit +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info +cluster|slots +cluster|nodes -hello -echo +info +latency +scan -reset -auth -asking ><<<PASSWORD>>>
 ```
 
-For monitoring a Sentinel-node you may use the following command with the right ACL:
+对于监控 Sentinel 节点，您可以使用以下命令设置正确的 ACL：
+
 ```
 ACL SETUSER <<<USERNAME>>> -@all +@connection -command +client -hello +info -auth +sentinel|masters +sentinel|replicas +sentinel|slaves +sentinel|sentinels +sentinel|ckquorum ><<<PASSWORD>>>
 ```
 
-### Run via Docker
+### 通过 Docker 运行
 
-The latest release is automatically published to [Docker Hub registry](https://hub.docker.com/r/oliver006/redis_exporter/)
+最新版本自动发布到 [Docker Hub 仓库](https://hub.docker.com/r/oliver006/redis_exporter/)
 
-You can run it like this:
+您可以这样运行：
 
 ```sh
 docker run -d --name redis_exporter -p 9121:9121 oliver006/redis_exporter
 ```
 
-Docker images are also published to the [Github Container Registry (ghcr.io)](https://github.com/oliver006/redis_exporter/pkgs/container/redis_exporter) and to [quay.io](https://quay.io/oliver006/redis_exporter) so you can pull them from there if for instance you run into rate limiting issues with Docker hub.
+Docker 镜像也发布到 [Github Container Registry (ghcr.io)](https://github.com/oliver006/redis_exporter/pkgs/container/redis_exporter) 和 [quay.io](https://quay.io/oliver006/redis_exporter)，如果您遇到 Docker hub 的速率限制问题，可以从那里拉取。
 
 ```sh
 docker run -d --name redis_exporter -p 9121:9121 quay.io/oliver006/redis_exporter
 
-# or
+# 或者
 
 docker run -d --name redis_exporter -p 9121:9121 ghcr.io/oliver006/redis_exporter
 ```
 
-The `latest` docker image contains only the exporter binary.
-If e.g. for debugging purposes, you need the exporter running
-in an image that has a shell then you can run the `alpine` image:
+`latest` docker 镜像只包含导出器二进制文件。
+如果出于调试目的，您需要在有 shell 的镜像中运行导出器，可以运行 `alpine` 镜像：
 
 ```sh
 docker run -d --name redis_exporter -p 9121:9121 oliver006/redis_exporter:alpine
 ```
 
-If you try to access a Redis instance running on the host node, you'll need to add `--network host` so the
-redis_exporter container can access it:
+如果您尝试访问在主机节点上运行的 Redis 实例，需要添加 `--network host` 以便 redis_exporter 容器可以访问它：
 
 ```sh
 docker run -d --name redis_exporter --network host oliver006/redis_exporter
 ```
 
-### Run on Kubernetes
+### 在 Kubernetes 上运行
 
-[Here](contrib/k8s-redis-and-exporter-deployment.yaml) is an example Kubernetes deployment configuration for how to deploy the redis_exporter as a sidecar to a Redis instance.
-
+[这里](contrib/k8s-redis-and-exporter-deployment.yaml) 是如何将 redis_exporter 作为 sidecar 部署到 Redis 实例的 Kubernetes 部署配置示例。
 
 ### Tile38
 
-[Tile38](https://tile38.com) now has native Prometheus support for exporting server metrics and basic stats about number of objects, strings, etc.
-You can also use redis_exporter to export Tile38 metrics, especially more advanced metrics by using Lua scripts or the `-check-keys` flag.\
-To enable Tile38 support, run the exporter with `--is-tile38=true`.
+[Tile38](https://tile38.com) 现在原生支持 Prometheus 导出服务器指标和对象、字符串等数量的基本统计。
+您也可以使用 redis_exporter 导出 Tile38 指标，特别是通过使用 Lua 脚本或 `-check-keys` 参数获取更高级的指标。\
+要启用 Tile38 支持，请使用 `--is-tile38=true` 运行导出器。
 
+## 导出的内容
 
-## What's exported
+大多数来自 INFO 命令的项目都被导出，详情请参阅 [文档](https://valkey.io/commands/info)。\
+此外，每个数据库都有总键数、过期键数和数据库中键的平均 TTL 的指标。\
+您还可以通过使用 `-check-keys`（或相关）参数导出键的值。导出器还将导出键的大小（或根据数据类型的长度）。
+这可用于导出（排序）集合、哈希、列表、流等中的元素数量。
+如果键是字符串格式并且与 `--check-keys`（或相关）匹配，则其字符串值将作为 `key_value_as_string` 指标中的标签导出。
 
-Most items from the INFO command are exported,
-see [documentation](https://valkey.io/commands/info) for details.\
-In addition, for every database there are metrics for total keys, expiring keys and the average TTL for keys in the database.\
-You can also export values of keys by using the `-check-keys` (or related) flag. The exporter will also export the size (or, depending on the data type, the length) of the key.
-This can be used to export the number of elements in (sorted) sets, hashes, lists, streams, etc.
-If a key is in string format and matches with `--check-keys` (or related) then its string value will be exported as a label in the `key_value_as_string` metric.
+如果您需要自定义指标收集，可以使用 `-script` 参数提供 [Redis Lua 脚本](https://valkey.io/commands/eval) 路径的逗号分隔列表。如果只传递一个脚本，可以省略逗号。示例可以在 [contrib 文件夹](./contrib/sample_collect_script.lua) 中找到。
 
-If you require custom metric collection, you can provide comma separated list of path(s) to [Redis Lua script(s)](https://valkey.io/commands/eval) using the `-script` flag. If you pass only one script, you can omit comma. An example can be found [in the contrib folder](./contrib/sample_collect_script.lua).
+### redis_memory_max_bytes 指标
 
+指标 `redis_memory_max_bytes` 将显示 Redis 可以使用的最大字节数。\
+如果没有为您抓取的 Redis 实例设置内存限制（这是 Redis 的默认设置），则为零。\
+您可以通过检查指标 `redis_config_maxmemory` 是否为零，或通过 redis-cli 连接到 Redis 实例并运行命令 `CONFIG GET MAXMEMORY` 来确认。
 
-### The redis_memory_max_bytes metric
+## 外观展示
 
-The metric `redis_memory_max_bytes`  will show the maximum number of bytes Redis can use.\
-It is zero if no memory limit is set for the Redis instance you're scraping (this is the default setting for Redis).\
-You can confirm that's the case by checking if the metric `redis_config_maxmemory` is zero or by connecting to the Redis instance via redis-cli and running the command `CONFIG GET MAXMEMORY`.
-
-
-## What it looks like
-
-Example [Grafana](http://grafana.org/) screenshots:
+示例 [Grafana](http://grafana.org/) 截图：
 ![redis_exporter_screen_01](https://cloud.githubusercontent.com/assets/1222339/19412031/897549c6-92da-11e6-84a0-b091f9deb81d.png)
 
 ![redis_exporter_screen_02](https://cloud.githubusercontent.com/assets/1222339/19412041/dee6d7bc-92da-11e6-84f8-610c025d6182.png)
 
-Grafana dashboard is available on [grafana.com](https://grafana.com/grafana/dashboards/763-redis-dashboard-for-prometheus-redis-exporter-1-x/) and/or [github.com](contrib/grafana_prometheus_redis_dashboard.json).
+Grafana 仪表板可在 [grafana.com](https://grafana.com/grafana/dashboards/763-redis-dashboard-for-prometheus-redis-exporter-1-x/) 和/或 [github.com](contrib/grafana_prometheus_redis_dashboard.json) 上获取。
 
-### Viewing multiple Redis simultaneously
+### 同时查看多个 Redis
 
-If running [Redis Sentinel](https://redis.io/topics/sentinel), it may be desirable to view the metrics of the various cluster members simultaneously. For this reason the dashboard's drop down is of the multi-value type, allowing for the selection of multiple Redis. Please note that there is a  caveat; the single stat panels up top namely `uptime`, `total memory use` and `clients` do not function upon viewing multiple Redis.
+如果运行 [Redis Sentinel](https://redis.io/topics/sentinel)，可能希望同时查看各个集群成员的指标。因此，仪表板的下拉菜单是多值类型，允许选择多个 Redis。请注意有一个警告；顶部的单一统计面板即 `uptime`、`total memory use` 和 `clients` 在查看多个 Redis 时不起作用。
 
+## 使用 mixin
 
-## Using the mixin
-There is a set of sample rules, alerts and dashboards available in [redis-mixin](contrib/redis-mixin/)
+在 [redis-mixin](contrib/redis-mixin/) 中有一组示例规则、告警和仪表板
 
-The mixin includes:
+mixin 包括：
 
-### Alerts (26 rules)
-- **Availability**: RedisDown, RedisTooManyConnections, RedisRejectedConnections
-- **Memory**: RedisOutOfMemory, RedisMemoryFragmentationHigh, RedisEvictingKeys
-- **Cluster**: RedisClusterSlotFail, RedisClusterSlotPfail, RedisClusterStateNotOk, RedisClusterSlotsIncomplete, RedisClusterSlotsNotOk, RedisClusterNodeDown, RedisClusterTooFewNodes, RedisClusterSizeChanged, RedisClusterMessageStalled, RedisClusterMessageReceiveStalled
-- **Replication**: RedisReplicationBroken, RedisReplicationLag
-- **Persistence**: RedisRdbLastSaveTooOld, RedisRdbBgsaveFailed, RedisAofRewriteFailed
-- **Queue Monitoring**: RedisQueueBacklog, RedisQueueBacklogCritical, RedisQueueGrowing
-- **Hotkey Monitoring**: RedisHotkeyDetected, RedisLargeKeyDetected
+### 告警（26 条规则）
+- **可用性**: RedisDown, RedisTooManyConnections, RedisRejectedConnections
+- **内存**: RedisOutOfMemory, RedisMemoryFragmentationHigh, RedisEvictingKeys
+- **集群**: RedisClusterSlotFail, RedisClusterSlotPfail, RedisClusterStateNotOk, RedisClusterSlotsIncomplete, RedisClusterSlotsNotOk, RedisClusterNodeDown, RedisClusterTooFewNodes, RedisClusterSizeChanged, RedisClusterMessageStalled, RedisClusterMessageReceiveStalled
+- **复制**: RedisReplicationBroken, RedisReplicationLag
+- **持久化**: RedisRdbLastSaveTooOld, RedisRdbBgsaveFailed, RedisAofRewriteFailed
+- **队列监控**: RedisQueueBacklog, RedisQueueBacklogCritical, RedisQueueGrowing
+- **热键监控**: RedisHotkeyDetected, RedisLargeKeyDetected
 
-### Recording Rules (14 rules)
-Pre-computed metrics for better query performance:
-- `redis_cluster:slots_health_ratio` - Cluster slots health percentage
-- `redis_cluster:is_healthy` - Overall cluster health (0/1)
-- `redis:memory_used_ratio` - Memory usage percentage
-- `redis:connections_used_ratio` - Connection usage percentage
-- `redis:keyspace_hit_ratio` - Cache hit ratio
-- `redis:commands_per_second` - Command throughput
-- And more...
+### Recording Rules（14 条规则）
+预计算的指标以获得更好的查询性能：
+- `redis_cluster:slots_health_ratio` - 集群 slots 健康百分比
+- `redis_cluster:is_healthy` - 整体集群健康状态 (0/1)
+- `redis:memory_used_ratio` - 内存使用百分比
+- `redis:connections_used_ratio` - 连接使用百分比
+- `redis:keyspace_hit_ratio` - 缓存命中率
+- `redis:commands_per_second` - 命令吞吐量
+- 更多...
 
-### Configuration
-All thresholds are configurable in `contrib/redis-mixin/config.libsonnet`:
+### 配置
+所有阈值都可以在 `contrib/redis-mixin/config.libsonnet` 中配置：
 
 ```jsonnet
 {
@@ -364,137 +331,116 @@ All thresholds are configurable in `contrib/redis-mixin/config.libsonnet`:
     redisReplicationLagThreshold: '30',
     redisQueueBacklogThreshold: '1000',
     redisHotkeyThreshold: '5',
-    // ... more options
+    // ... 更多选项
   },
 }
 ```
 
-### Building the mixin
+### 构建 mixin
 ```bash
 cd contrib/redis-mixin
-make deps   # Install dependencies
-make build  # Generate alerts.yaml, rules.yaml, and dashboards
+make deps   # 安装依赖
+make build  # 生成 alerts.yaml、rules.yaml 和仪表板
 ```
 
-## Upgrading from 0.x to 1.x
+## 按键组聚合内存使用
 
-[PR #256](https://github.com/oliver006/redis_exporter/pull/256) introduced breaking changes which were released as version v1.0.0.
+当单个 Redis 实例用于多种目的时，能够查看不同使用场景中 Redis 内存的消耗情况非常有用。当没有驱逐策略的 Redis 实例内存不足时，这尤其重要，因为我们想要确定是某些应用程序行为异常（例如没有删除不再使用的键）还是 Redis 实例需要扩展以处理增加的资源需求。幸运的是，大多数使用 Redis 的应用程序会为与其特定目的相关的键采用某种命名约定，如（层次化的）命名空间前缀，可以利用 redis_exporter 的 check-keys、check-single-keys 和 count-keys 参数来显示特定场景的内存使用指标。*按键组聚合内存使用* 更进一步，利用 Redis LUA 脚本支持的灵活性，通过用户定义的 [LUA 正则表达式](https://www.lua.org/pil/20.1.html) 列表将 Redis 实例上的所有键分类到组中，以便内存使用指标可以聚合到易于识别的组中。
 
-If you only scrape one Redis instance and use command line flags `--redis.address`
-and `--redis.password` then you're most probably not affected.
-Otherwise, please see [PR #256](https://github.com/oliver006/redis_exporter/pull/256) and [this README](https://github.com/oliver006/redis_exporter#prometheus-configuration-to-scrape-multiple-redis-hosts) for more information.
+要启用按键组聚合内存使用，只需通过 `check-key-groups` redis_exporter 参数指定一个非空的逗号分隔的 LUA 正则表达式列表。在每次按键组聚合内存指标时，redis_exporter 将为每个 Redis 数据库设置一个 `SCAN` 游标，通过 LUA 脚本分批处理。然后同一个 LUA 脚本逐键处理每个键批次，如下所示：
 
-## Memory Usage Aggregation by Key Groups
+  1. 调用 `MEMORY USAGE` 命令来收集每个键的内存使用情况
+  2. 指定的 LUA 正则表达式按指定顺序应用于每个键，给定键所属的组名将由第一个匹配该键的正则表达式的所有捕获组连接得出。例如，将正则表达式 `^(.*)_[^_]+$` 应用于键 `key_exp_Nick` 将产生组名 `key_exp`。如果没有指定的正则表达式匹配键，该键将被分配到 `unclassified` 组
 
-When a single Redis instance is used for multiple purposes, it is useful to be able to see how Redis memory is consumed among the different usage scenarios. This is particularly important when a Redis instance with no eviction policy is running low on memory as we want to identify whether certain applications are misbehaving (e.g. not deleting keys that are no longer in use) or the Redis instance needs to be scaled up to handle the increased resource demand. Fortunately, most applications using Redis will employ some sort of naming conventions for keys tied to their specific purpose such as (hierarchical) namespace prefixes which can be exploited by the check-keys, check-single-keys, and count-keys parameters of redis_exporter to surface the memory usage metrics of specific scenarios. *Memory usage aggregation by key groups* takes this one step further by harnessing the flexibility of Redis LUA scripting support to classify all keys on a Redis instance into groups through a list of user-defined [LUA regular expressions](https://www.lua.org/pil/20.1.html) so memory usage metrics can be aggregated into readily identifiable groups.
+一旦键被分类，相应组的内存使用量和键计数器将在本地 LUA 表中递增。当批次中的所有键都处理完毕后，这个聚合的指标表将与下一个 `SCAN` 游标位置一起返回给 redis_exporter，redis_exporter 可以将所有批次的数据聚合到一个分组内存使用指标的单一表中，供 Prometheus 指标抓取器使用。
 
-To enable memory usage aggregation by key groups, simply specify a non-empty comma-separated list of LUA regular expressions through the `check-key-groups` redis_exporter parameter. On each aggregation of memory metrics by key groups, redis_exporter will set up a `SCAN` cursor through all keys for each Redis database to be processed in batches via a LUA script. Each key batch is then processed by the same LUA script on a key-by-key basis as follows:
+按键组聚合时会暴露以下额外指标：
 
-  1. The `MEMORY USAGE` command is called to gather memory usage for each key
-  2. The specified LUA regexes are applied to each key in the specified order, and the group name that a given key belongs to will be derived from concatenating the capture groups of the first regex that matches the key. For example, applying the regex `^(.*)_[^_]+$` to the key `key_exp_Nick` would yield a group name of `key_exp`. If none of the specified regexes matches a key, the key will be assigned to the `unclassified` group
+| 名称 | 标签 | 描述 |
+|------|------|------|
+| redis_key_group_count | db,key_group | 键组中的键数量 |
+| redis_key_group_memory_usage_bytes | db,key_group | 键组的内存使用量 |
+| redis_number_of_distinct_key_groups | db | 当 `overflow` 组完全展开时 Redis 数据库中不同键组的数量 |
+| redis_last_key_groups_scrape_duration_milliseconds | | 最后一次按键组聚合内存使用的持续时间（毫秒）|
 
-Once a key has been classified, the memory usage and key counter for the corresponding group will be incremented in a local LUA table. This aggregated metrics table will then be returned alongside the next `SCAN` cursor position to redis_exporter when all keys in a batch have been processed, and redis_exporter can aggregate the data from all batches into a single table of grouped memory usage metrics for the Prometheus metrics scrapper.
+## 队列长度监控
 
-Besides making the full flexibility of LUA regex available for classifying keys into groups, the LUA script also has the benefit of reducing network traffic by executing all `MEMORY USAGE` commands on the Redis server and returning aggregated data to redis_exporter in a far more compact format than key-level data. The use of `SCAN` cursor over batches of keys processed by a server-side LUA script also helps prevent unbounded latency bubble in Redis's single processing thread, and the batch size can be tailored to specific environments via the `check-keys-batch-size` parameter.
+有两种方法监控队列长度（List、Stream、Sorted Set）：
 
-Scanning the entire key space of a Redis instance may sound a lttle extravagant, but it takes only a single scan to classify all keys into groups, and on a moderately sized system with ~780K keys and a rather complex list of 17 regexes, it takes an average of ~5s to perform a full aggregation of memory usage by key groups. Of course, the actual performance for specific systems will vary widely depending on the total number of keys, the number and complexity of regexes used for classification, and the configured batch size.
-
-To protect Prometheus from being overwhelmed by a large number of time series resulting from misconfigured group classification regular expression (e.g. applying the regular expression `^(.*)$` where each key will be classified into its own distinct group), a limit on the number of distinct key groups *per Redis database* can be configured via the `max-distinct-key-groups` parameter. If the `max-distinct-key-groups` limit is exceeded, only the key groups with the highest memory usage within the limit will be tracked separately, remaining key groups will be reported under a single `overflow` key group.
-
-Here is a list of additional metrics that will be exposed when memory usage aggregation by key groups is enabled:
-
-| Name                                               | Labels       | Description                                                                                   |
-|----------------------------------------------------|--------------|-----------------------------------------------------------------------------------------------|
-| redis_key_group_count                              | db,key_group | Number of keys in a key group                                                                 |
-| redis_key_group_memory_usage_bytes                 | db,key_group | Memory usage by key group                                                                     |
-| redis_number_of_distinct_key_groups                | db           | Number of distinct key groups in a Redis database when the `overflow` group is fully expanded |
-| redis_last_key_groups_scrape_duration_milliseconds |              | Duration of the last memory usage aggregation by key groups in milliseconds                   |
-
-### Script to collect Redis lists and respective sizes.
-If using Redis version < 4.0, most of the helpful metrics which we need to gather based on length or memory is not possible via default redis_exporter.
-With the help of LUA scripts, we can gather these metrics.
-One of these scripts [contrib/collect_lists_length_growing.lua](./contrib/collect_lists_length_growing.lua) will help to collect the length of redis lists.
-With this count, we can take following actions such as Create alerts or dashboards in Grafana or any similar tools with these Prometheus metrics.
-
-## Queue Length Monitoring
-
-There are two ways to monitor queue lengths (List, Stream, Sorted Set):
-
-### Method 1: Using built-in flags (recommended for fixed queues)
+### 方法 1：使用内置参数（推荐用于固定队列）
 
 ```bash
-# Monitor specific queues directly (fastest, no SCAN needed)
+# 直接监控特定队列（最快，不需要 SCAN）
 ./redis_exporter --check-single-keys="db0=queue:orders,db0=queue:emails,db0=celery"
 
-# Monitor queues matching patterns (uses SCAN)
+# 监控匹配模式的队列（使用 SCAN）
 ./redis_exporter --check-keys="db0=queue:*,db0=bull:*"
 ```
 
-This will export `redis_key_size{db, key}` metrics with the queue length:
-- For List: uses `LLEN`
-- For Stream: uses `XLEN`
-- For Sorted Set: uses `ZCARD`
-- For Hash: uses `HLEN`
+这将导出 `redis_key_size{db, key}` 指标，其中包含队列长度：
+- 对于 List：使用 `LLEN`
+- 对于 Stream：使用 `XLEN`
+- 对于 Sorted Set：使用 `ZCARD`
+- 对于 Hash：使用 `HLEN`
 
-### Method 2: Using Lua script (recommended for dynamic queues)
+### 方法 2：使用 Lua 脚本（推荐用于动态队列）
 
-For scenarios with many dynamic queues, use the provided Lua script:
+对于有很多动态队列的场景，使用提供的 Lua 脚本：
 
 ```bash
 ./redis_exporter --script=contrib/collect_queue_length.lua
 ```
 
-The script automatically scans for common queue prefixes (`queue:`, `celery:`, `bull:`, `sidekiq:`, `resque:`) and exports metrics via `redis_script_values{key}`.
+该脚本自动扫描常见的队列前缀（`queue:`、`celery:`、`bull:`、`sidekiq:`、`resque:`）并通过 `redis_script_values{key}` 导出指标。
 
-You can customize the script to add your own queue prefixes or specific queue names.
+您可以自定义脚本以添加自己的队列前缀或特定队列名称。
 
-## Key Hotspot Detection
+## Key 热点检测
 
-To detect hot keys (high access frequency) or large keys (high memory usage), use the hotspot detection script:
+要检测热点 key（高访问频率）或大 key（高内存使用），使用热点检测脚本：
 
 ```bash
 ./redis_exporter --script=contrib/collect_key_hotspot.lua
 ```
 
-### Exported Metrics
+### 导出的指标
 
-| Metric | Description |
-|--------|-------------|
-| `redis_script_values{key="hotkey_freq_<keyname>"}` | Access frequency of hot key (requires LFU policy) |
-| `redis_script_values{key="hotkey_memory_bytes_<keyname>"}` | Memory usage of hot key |
-| `redis_script_values{key="hotkey_detected_total"}` | Total number of hot keys detected |
-| `redis_script_values{key="large_key_count"}` | Number of keys exceeding memory threshold |
-| `redis_script_values{key="lfu_policy_enabled"}` | Whether LFU policy is enabled (1/0) |
+| 指标 | 描述 |
+|------|------|
+| `redis_script_values{key="hotkey_freq_<keyname>"}` | 热点 key 的访问频率（需要 LFU 策略）|
+| `redis_script_values{key="hotkey_memory_bytes_<keyname>"}` | 热点 key 的内存使用量 |
+| `redis_script_values{key="hotkey_detected_total"}` | 检测到的热点 key 总数 |
+| `redis_script_values{key="large_key_count"}` | 超过内存阈值的 key 数量 |
+| `redis_script_values{key="lfu_policy_enabled"}` | LFU 策略是否启用 (1/0) |
 
-### Enabling LFU for Better Hotspot Detection
+### 启用 LFU 以获得更好的热点检测
 
-For more accurate hotspot detection, enable LFU (Least Frequently Used) eviction policy in Redis:
+为了更准确地检测热点，在 Redis 中启用 LFU（最少使用）驱逐策略：
 
 ```bash
 redis-cli CONFIG SET maxmemory-policy allkeys-lfu
 ```
 
-When LFU is enabled, the script uses `OBJECT FREQ` to get the actual access frequency of keys. Without LFU, the script falls back to memory-based detection only.
+当启用 LFU 时，脚本使用 `OBJECT FREQ` 来获取键的实际访问频率。没有 LFU 时，脚本仅回退到基于内存的检测。
 
-### Configuring the Script
+### 配置脚本
 
-Edit `contrib/collect_key_hotspot.lua` to customize:
-- `key_prefixes`: Key prefixes to scan for hotspots
-- `top_n`: Number of top hot keys to export (default: 10)
-- `memory_threshold`: Memory threshold in bytes for large key detection (default: 1MB)
+编辑 `contrib/collect_key_hotspot.lua` 以自定义：
+- `key_prefixes`：要扫描热点的键前缀
+- `top_n`：要导出的前 N 个热点键数量（默认：10）
+- `memory_threshold`：大键检测的内存阈值（字节）（默认：1MB）
 
-## Development
+## 开发
 
-The tests require a variety of real Redis instances to not only verify correctness of the exporter but also
-compatibility with older versions of Redis and with Redis-like systems like KeyDB or Tile38.\
-The [docker-compose.yml](docker-compose.yml) file has service definitions for
-everything that's needed.\
-You can bring up the Redis test instances first by running `make docker-env-up` and then, every time you want to run the tests, you can run `make docker-test`. This will mount the current directory (with the .go source files) into a docker container and kick off the tests.\
-Once you're done testing you can bring down the stack by running `make docker-env-down`.\
-Or you can bring up the stack, run the tests, and then tear down the stack, all in one shot, by running `make docker-all`.
+测试需要各种真实的 Redis 实例，不仅用于验证导出器的正确性，还用于与旧版本 Redis 以及 KeyDB 或 Tile38 等类 Redis 系统的兼容性。\
+[docker-compose.yml](docker-compose.yml) 文件包含所需一切的服务定义。\
+您可以先通过运行 `make docker-env-up` 启动 Redis 测试实例，然后每次想运行测试时，可以运行 `make docker-test`。这将把当前目录（包含 .go 源文件）挂载到 docker 容器中并启动测试。\
+测试完成后，您可以通过运行 `make docker-env-down` 关闭堆栈。\
+或者您可以通过运行 `make docker-all` 一次性启动堆栈、运行测试、然后关闭堆栈。
 
-***Note.** Tests initialization can lead to unexpected results when using a persistent testing environment. When `make docker-env-up` is executed once and `make docker-test` is constantly run or stopped during execution, the number of keys in the database changes, which can lead to unexpected failures of tests. Use `make docker-env-down` periodacally to clean up as a workaround.*
+***注意：** 使用持久测试环境时，测试初始化可能导致意外结果。当 `make docker-env-up` 执行一次而 `make docker-test` 不断运行或在执行期间停止时，数据库中的键数量会变化，这可能导致测试意外失败。作为解决方法，请定期使用 `make docker-env-down` 进行清理。*
 
-## Communal effort
+## 社区贡献
 
-Open an issue or PR if you have more suggestions, questions or ideas about what to add.
+如果您有更多建议、问题或关于添加什么的想法，请开一个 issue 或 PR。
+
