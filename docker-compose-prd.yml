@@ -39,6 +39,11 @@ services:
       REDIS_ADDR: ${REDIS_ADDR:-redis://redis:6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
       REDIS_USER: ${REDIS_USER:-}
+      # 队列监控配置（按需启用，取消注释即可）
+      # 方式1: 监控指定队列（推荐，性能好）
+      # REDIS_EXPORTER_CHECK_SINGLE_KEYS: "db0=queue:orders,db0=queue:emails,db0=celery"
+      # 方式2: 模式匹配（大库慎用）
+      # REDIS_EXPORTER_CHECK_KEYS: "db0=queue:*"
     depends_on:
       redis:
         condition: service_healthy
