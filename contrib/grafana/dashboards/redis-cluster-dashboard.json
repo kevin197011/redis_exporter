@@ -676,7 +676,7 @@
         "options": [],
         "query": { "query": "label_values(redis_up, project)", "refId": "StandardVariableQuery" },
         "refresh": 2,
-        "regex": "",
+        "regex": "/.*cluster.*/",
         "skipUrlSync": false,
         "sort": 1,
         "type": "query"
