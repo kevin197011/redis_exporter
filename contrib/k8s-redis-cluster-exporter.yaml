@@ -65,7 +65,7 @@ spec:
         runAsGroup: 59000
       containers:
       - name: redis-exporter
-        image: kevin197011/redis_exporter:latest
+        image: ghcr.io/kevin197011/redis_exporter:latest
         args:
           - "--redis.addr="
           - "--is-cluster=true"
