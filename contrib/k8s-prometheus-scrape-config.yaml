@@ -1,59 +1,50 @@
-# Prometheus Additional Scrape Config for Redis Cluster
+# Prometheus Scrape Config for Redis Cluster
 #
-# 适用于: Prometheus Operator 的 additionalScrapeConfigs
+# 适用于没有安装 Prometheus Operator 的环境
 # 
 # 使用方式:
-#   1. 创建 Secret: kubectl create secret generic additional-scrape-configs \
-#                    --from-file=prometheus-additional.yaml=k8s-prometheus-scrape-config.yaml \
-#                    -n monitoring
-#   2. 在 Prometheus CR 中引用:
-#      spec:
-#        additionalScrapeConfigs:
-#          name: additional-scrape-configs
-#          key: prometheus-additional.yaml
+#   将以下配置添加到 prometheus.yml 的 scrape_configs 中
+#   或通过 Prometheus Operator 的 additionalScrapeConfigs 引入
 #
-# 或者直接添加到 prometheus.yml 的 scrape_configs 中
 # ============================================
 
-# Redis 集群节点监控
+# 方式一: 静态配置 (推荐，简单可靠)
 - job_name: 'redis-cluster'
   scrape_interval: 15s
   scrape_timeout: 10s
   metrics_path: /scrape
   
-  # 静态配置 Redis 节点
   static_configs:
     - targets:
-      # 修改为你的 Redis 节点地址
-      - 'redis-cluster-0.redis-cluster.default.svc.cluster.local:6379'
-      - 'redis-cluster-1.redis-cluster.default.svc.cluster.local:6379'
-      - 'redis-cluster-2.redis-cluster.default.svc.cluster.local:6379'
+      - 'redis-cluster-0.redis-cluster-headless.redis.svc.cluster.local:6379'
+      - 'redis-cluster-1.redis-cluster-headless.redis.svc.cluster.local:6379'
+      - 'redis-cluster-2.redis-cluster-headless.redis.svc.cluster.local:6379'
+      - 'redis-cluster-3.redis-cluster-headless.redis.svc.cluster.local:6379'
+      - 'redis-cluster-4.redis-cluster-headless.redis.svc.cluster.local:6379'
+      - 'redis-cluster-5.redis-cluster-headless.redis.svc.cluster.local:6379'
       labels:
-        project: 'production'
-        env: 'prod'
+        project: 'g32-prod'
   
   relabel_configs:
-    # 将 target 作为参数传递给 /scrape endpoint
+    # 构建 /scrape?target=redis://xxx 参数
     - source_labels: [__address__]
       target_label: __param_target
       replacement: 'redis://${1}'
     
-    # 保留原始地址作为 instance 标签
+    # 提取简短的 instance 名称 (redis-cluster-0:6379)
     - source_labels: [__address__]
+      regex: '(.+)\.redis-cluster-headless\.redis\.svc\.cluster\.local:(\d+)'
       target_label: instance
+      replacement: '${1}:${2}'
     
-    # 将请求发送到 redis-exporter service
+    # 请求发送到 redis-exporter
     - target_label: __address__
       replacement: 'redis-exporter.monitoring.svc.cluster.local:9121'
 
 ---
-# ============================================
-# 方式二: 使用 Kubernetes Service Discovery
-# 自动发现带有特定标签的 Redis Pod
-# ============================================
-
-# 自动发现 Redis Pods (基于 Pod 注解)
-- job_name: 'redis-pods-auto'
+# 方式二: Kubernetes Pod 自动发现
+# 自动发现 redis namespace 下带有 app=redis-cluster 标签的 Pod
+- job_name: 'redis-cluster-auto'
   scrape_interval: 15s
   metrics_path: /scrape
   
@@ -61,68 +52,40 @@
     - role: pod
       namespaces:
         names:
-          - default
           - redis
-          - production
   
   relabel_configs:
-    # 只抓取带有 redis.io/scrape=true 注解的 Pod
-    - source_labels: [__meta_kubernetes_pod_annotation_redis_io_scrape]
+    # 只抓取 redis-cluster 的 Pod
+    - source_labels: [__meta_kubernetes_pod_label_app]
       action: keep
-      regex: 'true'
-    
-    # 从 Pod 注解获取端口 (默认 6379)
-    - source_labels: [__meta_kubernetes_pod_annotation_redis_io_port]
-      action: replace
-      target_label: __tmp_port
-      regex: '(.+)'
-      replacement: '${1}'
-    - source_labels: [__tmp_port]
-      action: replace
-      target_label: __tmp_port
-      regex: ''
-      replacement: '6379'
+      regex: 'redis-cluster'
     
     # 构建 target 参数
-    - source_labels: [__meta_kubernetes_pod_ip, __tmp_port]
-      separator: ':'
+    - source_labels: [__meta_kubernetes_pod_ip]
       target_label: __param_target
-      replacement: 'redis://${1}:${2}'
+      replacement: 'redis://${1}:6379'
     
-    # 设置 instance 标签
-    - source_labels: [__meta_kubernetes_pod_ip, __tmp_port]
-      separator: ':'
+    # 设置 instance 标签 (Pod 名称)
+    - source_labels: [__meta_kubernetes_pod_name]
       target_label: instance
+      replacement: '${1}:6379'
     
-    # 将请求发送到 redis-exporter
+    # 请求发送到 redis-exporter
     - target_label: __address__
       replacement: 'redis-exporter.monitoring.svc.cluster.local:9121'
     
-    # 添加 Pod 名称标签
+    # 添加 project 标签
+    - targetLabel: project
+      replacement: 'g32-prod'
+    
+    # 保留 Pod 名称
     - source_labels: [__meta_kubernetes_pod_name]
       target_label: pod
-    
-    # 添加 namespace 标签
-    - source_labels: [__meta_kubernetes_namespace]
-      target_label: namespace
-    
-    # 从 Pod 标签获取 project
-    - source_labels: [__meta_kubernetes_pod_label_project]
-      target_label: project
-    
-    # 从 Pod 注解获取 project (优先)
-    - source_labels: [__meta_kubernetes_pod_annotation_redis_io_project]
-      action: replace
-      target_label: project
-      regex: '(.+)'
 
 ---
-# ============================================
-# 方式三: 使用 Kubernetes Service Discovery
-# 自动发现 Redis Service Endpoints
-# ============================================
-
-- job_name: 'redis-endpoints-auto'
+# 方式三: Kubernetes Endpoints 自动发现
+# 通过 Headless Service 发现所有 Redis 节点
+- job_name: 'redis-cluster-endpoints'
   scrape_interval: 15s
   metrics_path: /scrape
   
@@ -130,33 +93,33 @@
     - role: endpoints
       namespaces:
         names:
-          - default
           - redis
   
   relabel_configs:
-    # 只抓取带有 redis.io/scrape=true 标签的 Service
-    - source_labels: [__meta_kubernetes_service_label_redis_io_scrape]
+    # 只抓取 redis-cluster-headless service 的 endpoints
+    - source_labels: [__meta_kubernetes_service_name]
       action: keep
-      regex: 'true'
+      regex: 'redis-cluster-headless'
+    
+    # 只保留 6379 端口
+    - source_labels: [__meta_kubernetes_endpoint_port_name]
+      action: keep
+      regex: '.*'  # 或指定端口名如 'redis'
     
     # 构建 target
     - source_labels: [__address__]
       target_label: __param_target
       replacement: 'redis://${1}'
     
-    # 设置 instance
-    - source_labels: [__address__]
+    # 设置简短 instance
+    - source_labels: [__meta_kubernetes_pod_name]
       target_label: instance
+      replacement: '${1}:6379'
     
     # 发送到 exporter
     - target_label: __address__
       replacement: 'redis-exporter.monitoring.svc.cluster.local:9121'
     
-    # 添加 service 名称
-    - source_labels: [__meta_kubernetes_service_name]
-      target_label: service
-    
-    # 添加 project 标签
-    - source_labels: [__meta_kubernetes_service_label_project]
-      target_label: project
-
+    # project 标签
+    - targetLabel: project
+      replacement: 'g32-prod'
