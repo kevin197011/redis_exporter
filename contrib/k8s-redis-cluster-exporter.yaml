@@ -1,0 +1,238 @@
+# Redis Exporter for Kubernetes - 集群监控方案
+# 
+# 部署方式: 独立 Deployment + ServiceMonitor (Prometheus Operator)
+# 
+# 使用说明:
+#   1. 修改 ConfigMap 中的 Redis 节点地址
+#   2. 如有密码，修改 Secret 中的 REDIS_PASSWORD
+#   3. kubectl apply -f k8s-redis-cluster-exporter.yaml
+#
+# 前提条件:
+#   - Prometheus Operator 已安装 (用于 ServiceMonitor)
+#   - 或使用 prometheus.io/scrape 注解 (传统方式)
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+---
+# Redis 密码 Secret (可选)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-exporter-secret
+  namespace: monitoring
+type: Opaque
+stringData:
+  # 如果 Redis 有密码，在这里配置
+  # 无密码则留空或删除此 Secret
+  REDIS_PASSWORD: ""
+---
+# Redis 节点配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-exporter-config
+  namespace: monitoring
+data:
+  # ============================================
+  # 在此配置要监控的 Redis 节点
+  # ============================================
+  # 格式: redis://host:port 或 redis://user:password@host:port
+  # 集群模式: 列出所有节点
+  REDIS_TARGETS: |
+    redis://redis-cluster-0.redis-cluster.default.svc.cluster.local:6379
+    redis://redis-cluster-1.redis-cluster.default.svc.cluster.local:6379
+    redis://redis-cluster-2.redis-cluster.default.svc.cluster.local:6379
+  
+  # 项目标签，用于 Grafana 过滤
+  REDIS_PROJECT: "production"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter
+  namespace: monitoring
+  labels:
+    app: redis-exporter
+    app.kubernetes.io/name: redis-exporter
+    app.kubernetes.io/component: exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter
+  template:
+    metadata:
+      labels:
+        app: redis-exporter
+        app.kubernetes.io/name: redis-exporter
+      annotations:
+        # 传统 Prometheus 自动发现注解
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 59000
+        runAsGroup: 59000
+        fsGroup: 59000
+      containers:
+      - name: redis-exporter
+        image: kevin197011/redis_exporter:latest
+        imagePullPolicy: Always
+        args:
+          # 集群模式 - 自动发现所有节点
+          - "--redis.addr="
+          - "--is-cluster=true"
+          # 队列监控 (可选，按需取消注释)
+          # - "--check-single-keys=db0=queue:orders,db0=queue:tasks"
+          # - "--check-keys=db0=queue:*"
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-exporter-secret
+              key: REDIS_PASSWORD
+              optional: true
+        ports:
+        - name: metrics
+          containerPort: 9121
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: metrics
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: metrics
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter
+  namespace: monitoring
+  labels:
+    app: redis-exporter
+    app.kubernetes.io/name: redis-exporter
+spec:
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 9121
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: redis-exporter
+---
+# ============================================
+# Prometheus Operator ServiceMonitor
+# (需要安装 Prometheus Operator)
+# ============================================
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: redis-exporter
+  namespace: monitoring
+  labels:
+    app: redis-exporter
+    release: prometheus  # 根据你的 Prometheus Operator 配置调整
+spec:
+  selector:
+    matchLabels:
+      app: redis-exporter
+  namespaceSelector:
+    matchNames:
+    - monitoring
+  endpoints:
+  - port: metrics
+    interval: 15s
+    scrapeTimeout: 10s
+    path: /metrics
+---
+# ============================================
+# 多节点抓取配置 (PodMonitor 方式)
+# 通过 /scrape endpoint 抓取每个 Redis 节点
+# ============================================
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: redis-cluster-nodes
+  namespace: monitoring
+  labels:
+    app: redis-cluster-monitor
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: redis-exporter
+  namespaceSelector:
+    matchNames:
+    - monitoring
+  endpoints:
+  # 节点 1
+  - port: metrics
+    interval: 15s
+    path: /scrape
+    params:
+      target:
+      - "redis://redis-cluster-0.redis-cluster.default.svc.cluster.local:6379"
+    relabelings:
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+      regex: "redis://(.+)"
+      replacement: "$1"
+    - targetLabel: project
+      replacement: "production"
+  # 节点 2
+  - port: metrics
+    interval: 15s
+    path: /scrape
+    params:
+      target:
+      - "redis://redis-cluster-1.redis-cluster.default.svc.cluster.local:6379"
+    relabelings:
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+      regex: "redis://(.+)"
+      replacement: "$1"
+    - targetLabel: project
+      replacement: "production"
+  # 节点 3
+  - port: metrics
+    interval: 15s
+    path: /scrape
+    params:
+      target:
+      - "redis://redis-cluster-2.redis-cluster.default.svc.cluster.local:6379"
+    relabelings:
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+      regex: "redis://(.+)"
+      replacement: "$1"
+    - targetLabel: project
+      replacement: "production"
+
