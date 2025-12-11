@@ -37,7 +37,7 @@ metadata:
   namespace: monitoring
 type: Opaque
 stringData:
-  REDIS_PASSWORD: "BZLKiVpsOR"  # 填入 Redis 密码，无密码则留空
+  REDIS_PASSWORD: ""  # 填入 Redis 密码，无密码则留空
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -152,7 +152,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-0:6379"
     - targetLabel: project
-      replacement: "g32-prod-redis-cluster"
+      replacement: "myapp-prod-redis-cluster"
   # redis-cluster-1
   - port: metrics
     interval: 15s
@@ -163,7 +163,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-1:6379"
     - targetLabel: project
-      replacement: "g32-prod-redis-cluster"
+      replacement: "myapp-prod-redis-cluster"
   # redis-cluster-2
   - port: metrics
     interval: 15s
@@ -174,7 +174,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-2:6379"
     - targetLabel: project
-      replacement: "g32-prod-redis-cluster"
+      replacement: "myapp-prod-redis-cluster"
   # redis-cluster-3
   - port: metrics
     interval: 15s
@@ -185,7 +185,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-3:6379"
     - targetLabel: project
-      replacement: "g32-prod-redis-cluster"
+      replacement: "myapp-prod-redis-cluster"
   # redis-cluster-4
   - port: metrics
     interval: 15s
@@ -196,7 +196,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-4:6379"
     - targetLabel: project
-      replacement: "g32-prod-redis-cluster"
+      replacement: "myapp-prod-redis-cluster"
   # redis-cluster-5
   - port: metrics
     interval: 15s
@@ -207,4 +207,4 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-5:6379"
     - targetLabel: project
-      replacement: "g32-prod-redis-cluster"
+      replacement: "myapp-prod-redis-cluster"
