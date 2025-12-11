@@ -283,9 +283,63 @@ redis_exporter container can access it:
 docker run -d --name redis_exporter --network host oliver006/redis_exporter
 ```
 
+### Full Monitoring Stack Deployment (Docker Compose)
+
+This project provides complete Docker Compose configurations including Redis, Exporter, Prometheus, and Grafana:
+
+```bash
+# Redis Cluster monitoring (3 masters, 3 replicas)
+docker-compose -f docker-compose-cluster.yml up -d
+
+# Redis single instance monitoring
+docker-compose -f docker-compose-standalone.yml up -d
+
+# Redis master-slave replication monitoring
+docker-compose -f docker-compose-replication.yml up -d
+```
+
+Configuration files:
+
+| File | Description |
+|------|-------------|
+| `docker-compose-cluster.yml` | Redis Cluster + Exporter + Prometheus + Grafana |
+| `docker-compose-standalone.yml` | Single Redis + full monitoring stack |
+| `docker-compose-replication.yml` | Master-Slave + full monitoring stack |
+| `docker-compose-prd.yml` | Production: Exporter only |
+
+Access URLs:
+- Grafana: http://localhost:3000 (admin/admin123)
+- Prometheus: http://localhost:9090
+- Redis Exporter: http://localhost:9121/metrics
+
 ### Run on Kubernetes
 
+#### Sidecar Mode
+
 [Here](contrib/k8s-redis-and-exporter-deployment.yaml) is an example Kubernetes deployment configuration for how to deploy the redis_exporter as a sidecar to a Redis instance.
+
+#### Cluster Monitoring Mode (Recommended)
+
+For Redis Cluster (e.g., StatefulSet deployed redis-cluster-0 ~ redis-cluster-5), use standalone Exporter + ServiceMonitor:
+
+```bash
+# Deploy Exporter and ServiceMonitor
+kubectl apply -f contrib/k8s-redis-cluster-exporter.yaml
+```
+
+Configuration files:
+
+| File | Description |
+|------|-------------|
+| `contrib/k8s-redis-cluster-exporter.yaml` | Exporter Deployment + Service + ServiceMonitor |
+| `contrib/k8s-prometheus-scrape-config.yaml` | Prometheus scrape config (static and auto-discovery) |
+
+**Auto-Discovery Methods**:
+1. **Static Config**: List all Redis nodes in `scrape_configs`
+2. **Pod Auto-Discovery**: Via `kubernetes_sd_configs` pod role
+3. **Endpoints Auto-Discovery**: Via Headless Service endpoints
+
+**Project Label**: All metrics include a `project` label for filtering different Redis clusters in Grafana.
 
 
 ### Tile38
@@ -321,7 +375,32 @@ Example [Grafana](http://grafana.org/) screenshots:
 
 ![redis_exporter_screen_02](https://cloud.githubusercontent.com/assets/1222339/19412041/dee6d7bc-92da-11e6-84f8-610c025d6182.png)
 
-Grafana dashboard is available on [grafana.com](https://grafana.com/grafana/dashboards/763-redis-dashboard-for-prometheus-redis-exporter-1-x/) and/or [github.com](contrib/grafana_prometheus_redis_dashboard.json).
+### Grafana Dashboards
+
+This project provides two ready-to-use Grafana dashboards:
+
+| Dashboard | Use Case | File Location |
+|-----------|----------|---------------|
+| Redis Cluster Dashboard | Redis Cluster mode | [contrib/grafana/dashboards/redis-cluster-dashboard.json](contrib/grafana/dashboards/redis-cluster-dashboard.json) |
+| Redis Standalone Dashboard | Single instance or Master-Slave | [contrib/grafana/dashboards/redis-standalone-dashboard.json](contrib/grafana/dashboards/redis-standalone-dashboard.json) |
+
+**Dashboard Features**:
+- Multi-datasource support
+- Filter by `project` label for different clusters
+- Multi-select `instance` to view multiple nodes
+- Cluster dashboard auto-filters projects containing `cluster`
+- Standalone dashboard auto-filters projects containing `standalone`
+
+**Monitoring Panels Include**:
+- 📊 Instance Availability / Connections
+- 💾 Memory Usage / Fragmentation
+- 📈 Command Execution Count / Duration
+- 💽 RDB/AOF Persistence Status
+- 🔗 Master-Slave Replication Status
+- 🎯 Cluster Slots Health (cluster only)
+- 📊 Cache Hit Ratio Trend
+
+More dashboards available at [grafana.com](https://grafana.com/grafana/dashboards/763-redis-dashboard-for-prometheus-redis-exporter-1-x/).
 
 ### Viewing multiple Redis simultaneously
 

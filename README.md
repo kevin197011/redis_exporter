@@ -1,6 +1,6 @@
 # Prometheus Valkey & Redis 指标导出器
 
-[![Tests](https://github.com/kevin197011/redis_exporter/actions/workflows/tests.yml/badge.svg)](https://github.com/kevin197011/redis_exporter/actions/workflows/tests.yml)
+
 [![Docker Build](https://github.com/kevin197011/redis_exporter/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/kevin197011/redis_exporter/actions/workflows/docker-publish.yml)
 
 用于 Valkey 指标的 Prometheus 导出器（Redis 兼容）。\
@@ -290,9 +290,63 @@ docker run -d --name redis_exporter -p 9121:9121 ghcr.io/kevin197011/redis_expor
 docker run -d --name redis_exporter --network host ghcr.io/kevin197011/redis_exporter:latest
 ```
 
+### 完整监控栈部署（Docker Compose）
+
+本项目提供完整的 Docker Compose 配置，包含 Redis、Exporter、Prometheus 和 Grafana：
+
+```bash
+# Redis Cluster 监控（3主3从集群）
+docker-compose -f docker-compose-cluster.yml up -d
+
+# Redis 单实例监控
+docker-compose -f docker-compose-standalone.yml up -d
+
+# Redis 主从复制监控
+docker-compose -f docker-compose-replication.yml up -d
+```
+
+配置文件说明：
+
+| 文件 | 说明 |
+|------|------|
+| `docker-compose-cluster.yml` | Redis Cluster + Exporter + Prometheus + Grafana |
+| `docker-compose-standalone.yml` | 单实例 Redis + 完整监控栈 |
+| `docker-compose-replication.yml` | 主从复制 + 完整监控栈 |
+| `docker-compose-prd.yml` | 生产环境仅部署 Exporter |
+
+访问地址：
+- Grafana: http://localhost:3000 (admin/admin123)
+- Prometheus: http://localhost:9090
+- Redis Exporter: http://localhost:9121/metrics
+
 ### 在 Kubernetes 上运行
 
+#### Sidecar 模式
+
 [这里](contrib/k8s-redis-and-exporter-deployment.yaml) 是如何将 redis_exporter 作为 sidecar 部署到 Redis 实例的 Kubernetes 部署配置示例。
+
+#### 集群监控模式（推荐）
+
+对于 Redis Cluster（如 StatefulSet 部署的 redis-cluster-0 ~ redis-cluster-5），使用独立 Exporter + ServiceMonitor：
+
+```bash
+# 部署 Exporter 和 ServiceMonitor
+kubectl apply -f contrib/k8s-redis-cluster-exporter.yaml
+```
+
+配置文件说明：
+
+| 文件 | 说明 |
+|------|------|
+| `contrib/k8s-redis-cluster-exporter.yaml` | Exporter Deployment + Service + ServiceMonitor |
+| `contrib/k8s-prometheus-scrape-config.yaml` | Prometheus 抓取配置（支持静态配置和自动发现） |
+
+**自动发现方式**：
+1. **静态配置**：在 `scrape_configs` 中列出所有 Redis 节点
+2. **Pod 自动发现**：通过 `kubernetes_sd_configs` 的 pod 角色自动发现
+3. **Endpoints 自动发现**：通过 Headless Service 的 endpoints 自动发现
+
+**project 标签**：所有指标都带有 `project` 标签，方便在 Grafana 中按项目过滤不同的 Redis 集群。
 
 ### Tile38
 
@@ -323,7 +377,32 @@ docker run -d --name redis_exporter --network host ghcr.io/kevin197011/redis_exp
 
 ![redis_exporter_screen_02](https://cloud.githubusercontent.com/assets/1222339/19412041/dee6d7bc-92da-11e6-84f8-610c025d6182.png)
 
-Grafana 仪表板可在 [grafana.com](https://grafana.com/grafana/dashboards/763-redis-dashboard-for-prometheus-redis-exporter-1-x/) 和/或 [github.com](contrib/grafana_prometheus_redis_dashboard.json) 上获取。
+### Grafana 仪表板
+
+本项目提供两套开箱即用的 Grafana 仪表板：
+
+| 仪表板 | 适用场景 | 文件位置 |
+|--------|---------|---------|
+| Redis Cluster Dashboard | Redis 集群（Cluster 模式） | [contrib/grafana/dashboards/redis-cluster-dashboard.json](contrib/grafana/dashboards/redis-cluster-dashboard.json) |
+| Redis Standalone Dashboard | 单实例或主从架构 | [contrib/grafana/dashboards/redis-standalone-dashboard.json](contrib/grafana/dashboards/redis-standalone-dashboard.json) |
+
+**仪表板特性**：
+- 支持多数据源切换
+- 支持 `project` 标签过滤不同项目/集群
+- 支持 `instance` 多选查看多节点
+- 集群仪表板自动过滤包含 `cluster` 的项目
+- 单实例仪表板自动过滤包含 `standalone` 的项目
+
+**监控面板包括**：
+- 📊 实例可用性 / 连接数
+- 💾 内存使用 / 碎片率
+- 📈 命令执行次数 / 时长
+- 💽 RDB/AOF 持久化状态
+- 🔗 主从复制状态
+- 🎯 集群 Slots 健康度（仅集群版）
+- 📊 缓存命中率趋势
+
+更多仪表板可在 [grafana.com](https://grafana.com/grafana/dashboards/763-redis-dashboard-for-prometheus-redis-exporter-1-x/) 获取。
 
 ### 同时查看多个 Redis
 
