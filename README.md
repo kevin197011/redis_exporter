@@ -6,8 +6,6 @@
 用于 Valkey 指标的 Prometheus 导出器（Redis 兼容）。\
 支持 Valkey 和 Redis 2.x、3.x、4.x、5.x、6.x 和 7.x
 
-[English Documentation](README-en.md)
-
 ## 构建和运行导出器
 
 ### 本地构建和运行
