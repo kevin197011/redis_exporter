@@ -1,5 +1,5 @@
 # Redis Exporter for Kubernetes - 集群监控
-# 
+#
 # 适用环境:
 #   - Redis Cluster StatefulSet (如 redis-cluster-0 ~ redis-cluster-5)
 #   - Headless Service: redis-cluster-headless
@@ -24,7 +24,7 @@ metadata:
     name: monitoring
 ---
 # Redis 密码 (如无密码可跳过此 Secret)
-# 
+#
 # 方式一: 直接创建
 # kubectl -n monitoring create secret generic redis-exporter-secret \
 #   --from-literal=REDIS_PASSWORD='your-password'
@@ -37,7 +37,7 @@ metadata:
   namespace: monitoring
 type: Opaque
 stringData:
-  REDIS_PASSWORD: ""  # 填入 Redis 密码，无密码则留空
+  REDIS_PASSWORD: "BZLKiVpsOR"  # 填入 Redis 密码，无密码则留空
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -133,7 +133,7 @@ metadata:
   namespace: monitoring
   labels:
     app: redis-cluster
-    release: prometheus  # 根据你的 Prometheus Operator label selector 调整
+    release: kube-prometheus-stack  # 根据你的 Prometheus Operator label selector 调整
 spec:
   selector:
     matchLabels:
@@ -152,7 +152,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-0:6379"
     - targetLabel: project
-      replacement: "g32-prod"
+      replacement: "g32-prod-redis-cluster"
   # redis-cluster-1
   - port: metrics
     interval: 15s
@@ -163,7 +163,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-1:6379"
     - targetLabel: project
-      replacement: "g32-prod"
+      replacement: "g32-prod-redis-cluster"
   # redis-cluster-2
   - port: metrics
     interval: 15s
@@ -174,7 +174,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-2:6379"
     - targetLabel: project
-      replacement: "g32-prod"
+      replacement: "g32-prod-redis-cluster"
   # redis-cluster-3
   - port: metrics
     interval: 15s
@@ -185,7 +185,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-3:6379"
     - targetLabel: project
-      replacement: "g32-prod"
+      replacement: "g32-prod-redis-cluster"
   # redis-cluster-4
   - port: metrics
     interval: 15s
@@ -196,7 +196,7 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-4:6379"
     - targetLabel: project
-      replacement: "g32-prod"
+      replacement: "g32-prod-redis-cluster"
   # redis-cluster-5
   - port: metrics
     interval: 15s
@@ -207,4 +207,4 @@ spec:
     - targetLabel: instance
       replacement: "redis-cluster-5:6379"
     - targetLabel: project
-      replacement: "g32-prod"
+      replacement: "g32-prod-redis-cluster"
